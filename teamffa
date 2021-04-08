@@ -4,63 +4,240 @@ settings
 	{
 		Max FFA Players: 8
 	}
-
 	modes
 	{
 		disabled Assault
 		{
 			Limit Roles: 2 Of Each Role Per Team
 		}
-
 		disabled Control
 		{
 			Limit Roles: 2 Of Each Role Per Team
 		}
-
 		Deathmatch
 		{
-			Hero Limit: Off
-			Score To Win: 20
-
 			enabled maps
 			{
 				Kanezaka
 			}
+			Hero Limit: Off
+			Score To Win: 20
 		}
-
 		disabled Escort
 		{
 			Limit Roles: 2 Of Each Role Per Team
 		}
-
 		disabled Hybrid
 		{
 			Limit Roles: 2 Of Each Role Per Team
 		}
 	}
 }
-
-rule("Rule 1")
-{
-	event
-	{
-		Ongoing - Each Player;
-		All;
-		All;
-	}
-
-	conditions
-	{
-		Event Player == Host Player;
-	}
-
-	actions
-	{
-		Create HUD Text(All Players(All Teams), Custom String("X: {0}", X Component Of(Position Of(Event Player))), Null, Null, Left, 0,
-			Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
-		Create HUD Text(All Players(All Teams), Custom String("Y: {0}", Y Component Of(Position Of(Event Player))), Null, Null, Left, 1,
-			Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
-		Create HUD Text(All Players(All Teams), Custom String("Z: {0}", Z Component Of(Position Of(Event Player))), Null, Null, Left, 2,
-			Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
-	}
+variables {
+    global:
+        0: Players_In_Match
+        1: Team_1_Vectors
+        2: Team_2_Vectors
+        3: Team_3_Vectors
+        4: Team_4_Vectors
+        5: Team_1
+        6: Team_2
+        7: Team_3
+        8: Team_4
+        9: Team_1_Count
+        10: Team_2_Count
+        11: Team_3_Count
+        12: Team_4_Count
+        13: Player_Index
+        14: Array_Of_Teams
+        15: Array_Of_Team_Counts
+        16: Selector
+        17: In_Team_Mode
+    player:
+        0: Team_Membership
+        1: Team_Index
+        2: Index
+        3: Membership_Index
+        4: Secondary_Player_Index
+        5: Smallest_Team
 }
+subroutines {
+    0: TeleportTeams
+    1: CreateTeams
+}
+rule ("Rule 1") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Event Player == Host Player;
+    }
+    actions {
+        Create HUD Text(All Players(All Teams), Custom String("X: {0}", X Component Of(Position Of(Event Player)), Null, Null), Null, Null, Left, 0, Color(White), Null, Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Custom String("Y: {0}", Y Component Of(Position Of(Event Player)), Null, Null), Null, Null, Left, 1, Color(White), Null, Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Custom String("Z: {0}", Z Component Of(Position Of(Event Player)), Null, Null), Null, Null, Left, 2, Color(White), Null, Null, Visible To and String, Default Visibility);
+    }
+}
+
+rule ("Initialize variables") {
+    event {
+        Ongoing - Global;
+    }
+    actions {
+        Set Global Variable(Players_In_Match, Empty Array);
+        Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
+        Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
+        Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(10, 5.84, 6), Vector(-1, 6, 18)));
+        Set Global Variable(Team_4_Vectors, Array(Vector(1, 9, -46), Vector(-9, 7, -49), Vector(7, 8, -40)));
+        Set Global Variable(Team_1, Empty Array);
+        Set Global Variable(Team_2, Empty Array);
+        Set Global Variable(Team_3, Empty Array);
+        Set Global Variable(Team_4, Empty Array);
+        Set Global Variable(Array_Of_Teams, Array(Global.Team_1, Global.Team_2, Global.Team_3, Global.Team_4));
+        Set Global Variable(Selector, 0);
+    }
+}
+
+rule ("Teleport teams to the right coordinates") {
+    event {
+        Subroutine;
+        TeleportTeams;
+    }
+    actions {
+        Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
+        Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
+        Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
+        Wait(0.016, Ignore Condition);
+        Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
+        Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
+        Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
+        Wait(0.016, Ignore Condition);
+        Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
+        Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
+        Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
+        Wait(0.016, Ignore Condition);
+        Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
+        Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
+        Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
+    }
+}
+
+rule ("Wait 2 minutes before creating teams") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Is Game In Progress == True;
+    }
+    actions {
+        "Wait 2 minutes, then create teams for purposes of teleporting them\n to specified coordinates of Team_X_Vectors"
+        Wait(30, Abort When False);
+        Big Message(All Players(All Teams), Custom String("Creating teams!", Null, Null, Null));
+        Wait(2, Ignore Condition);
+        Start Rule(TeleportTeams, Do Nothing);
+        Set Global Variable(In_Team_Mode, True);
+        Wait(120, Abort When False);
+        Set Global Variable(In_Team_Mode, False);
+        Set Global Variable(Array_Of_Teams, Empty Array);
+    }
+}
+
+rule ("Create and check team status") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Set Global Variable(Players_In_Match, All Players(All Teams));
+        Set Global Variable(Players_In_Match, Randomized Array(Global.Players_In_Match));
+        "For each player in this randomized array, add them to a Team from 1-4\n Team they are added to is increased by 1 each time the loop runs until it hits 3\n i.e. Team 4, then it goes back to Team 1."
+        For Global Variable(Player_Index, 0, Subtract(Count Of(Global.Players_In_Match), 1), 1);
+            Modify Global Variable At Index(Array_Of_Teams, Global.Selector, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+            Modify Global Variable(Selector, Add, 1);
+            If(Compare(Global.Selector, ==, 3));
+                Set Global Variable(Selector, 0);
+            End;
+            Wait(0.016, Ignore Condition);
+        End;
+        Set Global Variable(Selector, 0);
+    }
+}
+
+rule ("Find team membership") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Array Contains(Global.Array_Of_Teams, Event Player) == True;
+    }
+    actions {
+        For Player Variable(Event Player, Index, 0, 3, 1);
+            For Player Variable(Event Player, Secondary_Player_Index, 0, Subtract(Count Of(Global.Players_In_Match), 1), 1);
+                If(Compare((Event Player).Index, ==, 0));
+                    Set Player Variable(Event Player, Membership_Index, Global.Team_1);
+                Else If(Compare((Event Player).Index, ==, 1));
+                    Set Player Variable(Event Player, Membership_Index, Global.Team_2);
+                Else If(Compare((Event Player).Index, ==, 2));
+                    Set Player Variable(Event Player, Membership_Index, Global.Team_3);
+                Else If(Compare((Event Player).Index, ==, 3));
+                    Set Player Variable(Event Player, Membership_Index, Global.Team_4);
+                End;
+                If(Value In Array((Event Player).Membership_Index, Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)));
+                    Set Player Variable(Event Player, Team_Membership, True);
+                Else;
+                    Set Player Variable(Event Player, Team_Membership, False);
+                End;
+                If(Compare((Event Player).Team_Membership, ==, True));
+                    Start Damage Modification(Remove From Array(Value In Array(Global.Array_Of_Teams, (Event Player).Index), Value In Array(Global.Players_In_Match, (Event Player).Index)), Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index), 0.001, Receivers and Damagers);
+                End;
+            End;
+        End;
+    }
+}
+
+rule ("Remove player from team array when leaving") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        If(Compare(All Players(All Teams), !=, Global.Players_In_Match));
+            Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Null));
+    }
+}
+
+rule ("Assign team to players who join") {
+    event {
+        Player Joined Match;
+        All;
+        All;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Set Global Variable(Team_1, Remove From Array(Global.Team_1, Null));
+        Set Global Variable(Team_2, Remove From Array(Global.Team_2, Null));
+        Set Global Variable(Team_3, Remove From Array(Global.Team_3, Null));
+        Set Global Variable(Team_4, Remove From Array(Global.Team_4, Null));
+        Set Global Variable(Team_1_Count, Count Of(Global.Team_1));
+        Set Global Variable(Team_2_Count, Count Of(Global.Team_2));
+        Set Global Variable(Team_3_Count, Count Of(Global.Team_3));
+        Set Global Variable(Team_4_Count, Count Of(Global.Team_4));
+        Set Global Variable(Array_Of_Team_Counts, Array(Global.Team_1_Count, Global.Team_2_Count, Global.Team_3_Count, Global.Team_4_Count));
+        Set Player Variable(Event Player, Smallest_Team, First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)));
+        Modify Player Variable(Event Player, Smallest_Team, Append To Array, Event Player);
+    }
+}
+
