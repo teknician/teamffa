@@ -104,8 +104,12 @@ rule ("Initialize variables") {
 
 rule ("Teleport teams to the right coordinates") {
     event {
-        Subroutine;
-        TeleportTeams;
+        Ongoing - Global;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+        Or(Or(Or(Compare(Global.Team_1, !=, Empty Array), Compare(Global.Team_2, !=, Empty Array)), Compare(Global.Team_3, !=, Empty Array)), Compare(Global.Team_4, !=, Empty Array)) == True;
     }
     actions {
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
@@ -136,15 +140,12 @@ rule ("Wait 2 minutes before creating teams") {
     }
     actions {
         "Wait 2 minutes, then create teams for purposes of teleporting them\n to specified coordinates of Team_X_Vectors"
-        Wait(30, Abort When False);
+        Wait(15, Abort When False);
         Big Message(All Players(All Teams), Custom String("Creating teams!", Null, Null, Null));
         Wait(1, Ignore Condition);
         Set Global Variable(In_Team_Mode, True);
-        Wait(2, Ignore Condition);
+        Wait(5, Ignore Condition);
         Start Rule(TeleportTeams, Do Nothing);
-        Wait(120, Abort When False);
-        Set Global Variable(In_Team_Mode, False);
-        Set Global Variable(Array_Of_Teams, Empty Array);
     }
 }
 
@@ -170,6 +171,7 @@ rule ("Create and check team status") {
         End;
         Set Global Variable(Selector, 0);
         Big Message(All Players(All Teams), Custom String("Team memberships created.", Null, Null, Null));
+        Small Message(All Players(All Teams), Custom String("{0}", Global.Array_Of_Teams, Null, Null));
     }
 }
 
