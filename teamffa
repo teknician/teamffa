@@ -138,9 +138,10 @@ rule ("Wait 2 minutes before creating teams") {
         "Wait 2 minutes, then create teams for purposes of teleporting them\n to specified coordinates of Team_X_Vectors"
         Wait(30, Abort When False);
         Big Message(All Players(All Teams), Custom String("Creating teams!", Null, Null, Null));
+        Wait(1, Ignore Condition);
+        Set Global Variable(In_Team_Mode, True);
         Wait(2, Ignore Condition);
         Start Rule(TeleportTeams, Do Nothing);
-        Set Global Variable(In_Team_Mode, True);
         Wait(120, Abort When False);
         Set Global Variable(In_Team_Mode, False);
         Set Global Variable(Array_Of_Teams, Empty Array);
@@ -168,7 +169,7 @@ rule ("Create and check team status") {
             Wait(0.016, Ignore Condition);
         End;
         Set Global Variable(Selector, 0);
-        Big Message(All Players(All Teams), Custom String("Team memberships have been created.", Null, Null, Null));
+        Big Message(All Players(All Teams), Custom String("Team memberships created.", Null, Null, Null));
     }
 }
 
@@ -207,6 +208,7 @@ rule ("Find team membership") {
     }
     conditions {
         Array Contains(Global.Array_Of_Teams, Event Player) == True;
+        Global.In_Team_Mode != False;
     }
     actions {
         For Player Variable(Event Player, Index, 0, 3, 1);
