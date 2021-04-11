@@ -159,9 +159,17 @@ rule ("Create and check team status") {
         "For each player in this randomized array, add them to a Team from 1-4\n Team they are added to is increased by 1 each time the loop runs until it hits 3\n i.e. Team 4, then it goes back to Team 1."
         Wait(0.016, Ignore Condition);
         For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-            Modify Global Variable At Index(Array_Of_Teams, Global.Selector, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+            If(Compare(Global.Selector, ==, 0));
+                Modify Global Variable(Team_1, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+            Else If(Compare(Global.Selector, ==, 1));
+                Modify Global Variable(Team_2, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+            Else If(Compare(Global.Selector, ==, 2));
+                Modify Global Variable(Team_3, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+            Else If(Compare(Global.Selector, ==, 3));
+                Modify Global Variable(Team_4, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+            End;
             Modify Global Variable(Selector, Add, 1);
-            If(Compare(Global.Selector, ==, 3));
+            If(Compare(Global.Selector, ==, 4));
                 Set Global Variable(Selector, 0);
             End;
             Wait(0.016, Ignore Condition);
@@ -181,6 +189,7 @@ rule ("Assign team to players who join") {
     conditions {
         Is Game In Progress == True;
         Global.In_Team_Mode != False;
+        Or(Or(Or(Compare(Count Of(Global.Team_1), >, 0), Compare(Count Of(Global.Team_2), >, 0)), Compare(Count Of(Global.Team_3), >, 0)), Compare(Count Of(Global.Team_4), >, 0)) == True;
     }
     actions {
         Wait(3, Ignore Condition);
@@ -211,7 +220,7 @@ rule ("Find team membership") {
     }
     actions {
         For Player Variable(Event Player, Index, 0, 3, 1);
-            For Player Variable(Event Player, Secondary_Player_Index, 0, Subtract(Count Of(Global.Players_In_Match), 1), 1);
+            For Player Variable(Event Player, Secondary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Compare((Event Player).Index, ==, 0));
                     Set Player Variable(Event Player, Membership_Index, Global.Team_1);
                 Else If(Compare((Event Player).Index, ==, 1));
@@ -274,7 +283,7 @@ rule ("Remove player from team array when leaving") {
     }
     actions {
         If(Compare(Number Of Players(All Teams), <, Count Of(Global.Players_In_Match)));
-            For Global Variable(Tertiary_Player_Index, 0, Subtract(Count Of(Global.Players_In_Match), 1), 1);
+            For Global Variable(Tertiary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Not(Array Contains(All Players(All Teams), Global.Tertiary_Player_Index)));
                     Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Global.Player_Index));
                     Big Message(All Players(All Teams), Custom String("Missing player removed from array.", Null, Null, Null));
