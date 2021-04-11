@@ -288,13 +288,13 @@ rule ("Prevent damage from teammates") {
                 Else If(Compare((Event Player).Index, ==, 3));
                     Set Player Variable(Event Player, Membership_Index, Global.Team_4);
                 End;
-                If(Compare(Value In Array((Event Player).Membership_Index, (Event Player).Secondary_Player_Index), ==, Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)));
+                If(Array Contains((Event Player).Membership_Index, Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)));
                     Set Player Variable(Event Player, Team_Membership, True);
                 Else;
                     Set Player Variable(Event Player, Team_Membership, False);
                 End;
                 If(Compare((Event Player).Team_Membership, ==, True));
-                    Start Damage Modification(Remove From Array(Value In Array(Global.Array_Of_Teams, (Event Player).Index), Value In Array(Global.Players_In_Match, (Event Player).Index)), Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index), 0.001, Receivers and Damagers);
+                    Start Damage Modification(Remove From Array(Value In Array(Global.Array_Of_Teams, (Event Player).Index), Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)), Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index), 0.001, Receivers and Damagers);
                 End;
             End;
         End;
