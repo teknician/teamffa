@@ -85,7 +85,7 @@ rule ("Rule 1") {
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_3: {0}, {1}, {2}", First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), Null, Left, 7, Null, Color(Rose), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_4: {0}, {1}, {2}", First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), Null, Left, 8, Null, Color(Rose), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_1_Count: {0}\nTeam_2_Count: {1}\nTeam_3_Count: {2}", Global.Team_1_Count, Global.Team_2_Count, Custom String("{0}\nTeam_4_Count: {1}", Global.Team_3_Count, Global.Team_4_Count, Null)), Null, Left, 9, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts: {1}\nIn Team Mode: {2}", (Event Player).Smallest_Team, Global.Array_Of_Team_Counts, Global.In_Team_Mode), Null, Left, 10, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts: {1}, {2}", (Event Player).Smallest_Team, First Of(Global.Array_Of_Team_Counts), Custom String("{0}, {1}, {2}", Value In Array(Global.Array_Of_Team_Counts, 1), Value In Array(Global.Array_Of_Team_Counts, 2), Custom String("{0}\nIn Team Mode: {1}", Value In Array(Global.Array_Of_Team_Counts, 3), Global.In_Team_Mode, Null))), Null, Left, 10, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("1Vectors: {0}, {1}, {2}", First Of(Global.Team_1_Vectors), Value In Array(Global.Team_1_Vectors, 1), Value In Array(Global.Team_1_Vectors, 2)), Null, Right, 0, Null, Color(Yellow), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("2Vectors: {0}, {1}, {2}", First Of(Global.Team_2_Vectors), Value In Array(Global.Team_2_Vectors, 1), Value In Array(Global.Team_2_Vectors, 2)), Null, Right, 1, Null, Color(Red), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("3Vectors: {0}, {1}, {2}", First Of(Global.Team_3_Vectors), Value In Array(Global.Team_3_Vectors, 1), Value In Array(Global.Team_3_Vectors, 2)), Null, Right, 2, Null, Color(Blue), Null, Visible To and String, Default Visibility);
@@ -263,6 +263,7 @@ rule ("Teleport teams to the right coordinates") {
         Or(Or(Or(Compare(Count Of(Global.Team_1), >, 0), Compare(Count Of(Global.Team_2), >, 0)), Compare(Count Of(Global.Team_3), >, 0)), Compare(Count Of(Global.Team_4), >, 0)) == True;
     }
     actions {
+        Wait(10, Ignore Condition);
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
         Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
         Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
