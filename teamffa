@@ -48,12 +48,16 @@ variables {
         10: Team_2_Count
         11: Team_3_Count
         12: Team_4_Count
-        13: Player_Index
-        14: Tertiary_Player_Index
-        15: Array_Of_Teams
-        16: Array_Of_Team_Counts
-        17: Selector
-        18: In_Team_Mode
+        13: Team_1_Nametags
+        14: Team_2_Nametags
+        15: Team_3_Nametags
+        16: Team_4_Nametags
+        17: Player_Index
+        18: Tertiary_Player_Index
+        19: Array_Of_Teams
+        20: Array_Of_Team_Counts
+        21: Selector
+        22: In_Team_Mode
     player:
         0: Team_Membership
         1: Team_Index
@@ -85,7 +89,7 @@ rule ("Rule 1") {
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_3: {0}, {1}, {2}", First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), Null, Left, 7, Null, Color(Rose), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_4: {0}, {1}, {2}", First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), Null, Left, 8, Null, Color(Rose), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_1_Count: {0}\nTeam_2_Count: {1}\nTeam_3_Count: {2}", Global.Team_1_Count, Global.Team_2_Count, Custom String("{0}\nTeam_4_Count: {1}", Global.Team_3_Count, Global.Team_4_Count, Null)), Null, Left, 9, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts: {1}, {2}", (Event Player).Smallest_Team, First Of(Global.Array_Of_Team_Counts), Custom String("{0}, {1}, {2}", Value In Array(Global.Array_Of_Team_Counts, 1), Value In Array(Global.Array_Of_Team_Counts, 2), Custom String("{0}\nIn Team Mode: {1}", Value In Array(Global.Array_Of_Team_Counts, 3), Global.In_Team_Mode, Null))), Null, Left, 10, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts: {1}, {2}", First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)), First Of(Global.Array_Of_Team_Counts), Custom String("{0}, {1}, {2}", Value In Array(Global.Array_Of_Team_Counts, 1), Value In Array(Global.Array_Of_Team_Counts, 2), Custom String("{0}\nIn Team Mode: {1}", Value In Array(Global.Array_Of_Team_Counts, 3), Global.In_Team_Mode, Null))), Null, Left, 10, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("1Vectors: {0}, {1}, {2}", First Of(Global.Team_1_Vectors), Value In Array(Global.Team_1_Vectors, 1), Value In Array(Global.Team_1_Vectors, 2)), Null, Right, 0, Null, Color(Yellow), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("2Vectors: {0}, {1}, {2}", First Of(Global.Team_2_Vectors), Value In Array(Global.Team_2_Vectors, 1), Value In Array(Global.Team_2_Vectors, 2)), Null, Right, 1, Null, Color(Red), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("3Vectors: {0}, {1}, {2}", First Of(Global.Team_3_Vectors), Value In Array(Global.Team_3_Vectors, 1), Value In Array(Global.Team_3_Vectors, 2)), Null, Right, 2, Null, Color(Blue), Null, Visible To and String, Default Visibility);
@@ -112,7 +116,7 @@ rule ("Initialize variables") {
     actions {
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
-        Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(10, 5.84, 6), Vector(-1, 6, 18)));
+        Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(-10, 5.84, 6), Vector(-1, 6, 18)));
         Set Global Variable(Team_4_Vectors, Array(Vector(1, 9, -46), Vector(-9, 7, -49), Vector(7, 8, -40)));
         Set Global Variable(Team_1, Empty Array);
         Set Global Variable(Team_2, Empty Array);
@@ -181,11 +185,56 @@ rule ("Create and check team status") {
             Small Message(All Players(All Teams), Custom String("Player assigned team.", Null, Null, Null));
         End;
         Big Message(All Players(All Teams), Custom String("Team memberships created.", Null, Null, Null));
+        Wait(0.25, Ignore Condition);
+        Create In-World Text(Global.Team_1, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_1_Nametags, 0, Last Text ID);
+        Create In-World Text(Global.Team_1, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_1, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_1_Nametags, 1, Last Text ID);
+        Create In-World Text(Global.Team_1, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_1, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_1_Nametags, 2, Last Text ID);
+        Create In-World Text(Global.Team_2, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_2_Nametags, 0, Last Text ID);
+        Create In-World Text(Global.Team_2, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_2_Nametags, 1, Last Text ID);
+        Create In-World Text(Global.Team_2, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_2_Nametags, 2, Last Text ID);
+        Create In-World Text(Global.Team_3, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_3), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_3_Nametags, 0, Last Text ID);
+        Create In-World Text(Global.Team_3, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_3_Nametags, 1, Last Text ID);
+        Create In-World Text(Global.Team_3, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_3_Nametags, 2, Last Text ID);
+        Create In-World Text(Global.Team_4, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_4_Nametags, 0, Last Text ID);
+        Create In-World Text(Global.Team_4, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_4_Nametags, 1, Last Text ID);
+        Create In-World Text(Global.Team_4, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Set Global Variable At Index(Team_4_Nametags, 2, Last Text ID);
+        Wait(0.25, Ignore Condition);
         Set Global Variable(Team_1_Count, Count Of(Global.Team_1));
         Set Global Variable(Team_2_Count, Count Of(Global.Team_2));
         Set Global Variable(Team_3_Count, Count Of(Global.Team_3));
         Set Global Variable(Team_4_Count, Count Of(Global.Team_4));
         Set Global Variable(Array_Of_Team_Counts, Array(Global.Team_1_Count, Global.Team_2_Count, Global.Team_3_Count, Global.Team_4_Count));
+    }
+}
+
+rule ("Remove player from team array when leaving") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+        Number Of Players(All Teams) < Count Of(Global.Players_In_Match);
+    }
+    actions {
+        For Global Variable(Tertiary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+            If(Not(Array Contains(All Players(All Teams), Value In Array(Global.Players_In_Match, Global.Tertiary_Player_Index))));
+                Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Global.Player_Index));
+                Big Message(All Players(All Teams), Custom String("Missing player removed from array.", Null, Null, Null));
+            End;
+        End;
     }
 }
 
@@ -217,7 +266,7 @@ rule ("Assign team to players who join") {
     }
 }
 
-rule ("Find team membership") {
+rule ("Prevent damage from teammates") {
     event {
         Ongoing - Each Player;
         All;
@@ -239,7 +288,7 @@ rule ("Find team membership") {
                 Else If(Compare((Event Player).Index, ==, 3));
                     Set Player Variable(Event Player, Membership_Index, Global.Team_4);
                 End;
-                If(Value In Array((Event Player).Membership_Index, Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)));
+                If(Compare(Value In Array((Event Player).Membership_Index, (Event Player).Secondary_Player_Index), ==, Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)));
                     Set Player Variable(Event Player, Team_Membership, True);
                 Else;
                     Set Player Variable(Event Player, Team_Membership, False);
@@ -280,25 +329,6 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
         Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
         Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
-    }
-}
-
-rule ("Remove player from team array when leaving") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Is Game In Progress == True;
-        Global.In_Team_Mode != False;
-    }
-    actions {
-        If(Compare(Number Of Players(All Teams), <, Count Of(Global.Players_In_Match)));
-            For Global Variable(Tertiary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-                If(Not(Array Contains(All Players(All Teams), Global.Tertiary_Player_Index)));
-                    Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Global.Player_Index));
-                    Big Message(All Players(All Teams), Custom String("Missing player removed from array.", Null, Null, Null));
-                End;
-            End;
     }
 }
 
