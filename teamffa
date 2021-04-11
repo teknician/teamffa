@@ -81,7 +81,7 @@ rule ("Rule 1") {
         Create HUD Text(All Players(All Teams), Null, Custom String("Array of Teams: {0}\nTeam_1: {1}\nTeam_2: {2}", Global.Array_Of_Teams, Global.Team_1, Custom String("{0}\nTeam_3: {1}\nTeam_4: {2}", Global.Team_2, Global.Team_3, Global.Team_4)), Null, Left, 3, Null, Color(Lime Green), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_1_Count: {0}\nTeam_2_Count: {1}\nTeam_3_Count: {2}", Global.Team_1_Count, Global.Team_2_Count, Custom String("{0}\nTeam_4_Count: {1}", Global.Team_3_Count, Global.Team_4_Count, Null)), Null, Left, 4, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts {1}\nIn Team Mode: {2}", (Event Player).Smallest_Team, Global.Array_Of_Team_Counts, Global.In_Team_Mode), Null, Left, 5, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Custom String("1Vectors: {0}\n2Vectors: {1}\n3Vectors: {2}", Global.Team_1_Vectors, Global.Team_2_Vectors, Custom String("{0}\n4Vectors: {1}", Global.Team_3_Vectors, Global.Team_4_Vectors, Null)), Null, Null, Right, 0, Color(Yellow), Null, Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("1Vectors: {0}\n2Vectors: {1}\n3Vectors: {2}", Global.Team_1_Vectors, Global.Team_2_Vectors, Custom String("{0}\n4Vectors: {1}", Global.Team_3_Vectors, Global.Team_4_Vectors, Null)), Null, Right, 0, Null, Color(Yellow), Null, Visible To and String, Default Visibility);
     }
 }
 
@@ -102,35 +102,6 @@ rule ("Initialize variables") {
         Set Global Variable(Array_Of_Teams, Array(Global.Team_1, Global.Team_2, Global.Team_3, Global.Team_4));
         Set Global Variable(Selector, 0);
         Big Message(All Players(All Teams), Custom String("Variables were initialized.", Null, Null, Null));
-    }
-}
-
-rule ("Teleport teams to the right coordinates") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Is Game In Progress == True;
-        Global.In_Team_Mode != False;
-        Or(Or(Or(Compare(Global.Team_1, !=, Empty Array), Compare(Global.Team_2, !=, Empty Array)), Compare(Global.Team_3, !=, Empty Array)), Compare(Global.Team_4, !=, Empty Array)) == True;
-    }
-    actions {
-        Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
-        Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
-        Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
-        Wait(0.016, Ignore Condition);
-        Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
-        Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
-        Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
-        Wait(0.016, Ignore Condition);
-        Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
-        Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
-        Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
-        Wait(0.016, Ignore Condition);
-        Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
-        Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
-        Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
-        Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
     }
 }
 
@@ -236,6 +207,35 @@ rule ("Find team membership") {
             End;
         End;
         Big Message(All Players(All Teams), Custom String("Team member relationships initialized.", Null, Null, Null));
+    }
+}
+
+rule ("Teleport teams to the right coordinates") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+        Or(Or(Or(Compare(Count Of(Global.Team_1), >, 0), Compare(Count Of(Global.Team_2), >, 0)), Compare(Count Of(Global.Team_3), >, 0)), Compare(Count Of(Global.Team_4), >, 0)) == True;
+    }
+    actions {
+        Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
+        Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
+        Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
+        Wait(0.016, Ignore Condition);
+        Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
+        Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
+        Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
+        Wait(0.016, Ignore Condition);
+        Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
+        Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
+        Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
+        Wait(0.016, Ignore Condition);
+        Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
+        Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
+        Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
+        Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
     }
 }
 
