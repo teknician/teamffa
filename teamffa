@@ -135,15 +135,17 @@ rule ("Wait 2 minutes before creating teams") {
         "Wait 2 minutes, then create teams for purposes of teleporting them\n to specified coordinates of Team_X_Vectors"
         Wait(10, Abort When False);
         Big Message(All Players(All Teams), Custom String("Creating teams!", Null, Null, Null));
-        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Hanzo), All Teams, -1, Vector(0, 50, 0), Forward);
         Create Dummy Bot(Hero(Mercy), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Winston), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Mei), All Teams, -1, Vector(0, 50, 0), Forward);
         Create Dummy Bot(Hero(Ana), All Teams, -1, Vector(0, 50, 0), Forward);
         Create Dummy Bot(Hero(Ashe), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(McCree), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Reaper), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Baptiste), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Echo), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Orisa), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(D.Va), All Teams, -1, Vector(0, 50, 0), Forward);
         Create Dummy Bot(Hero(Genji), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Zarya), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Moira), All Teams, -1, Vector(0, 50, 0), Forward);
         Wait(1, Ignore Condition);
         Set Global Variable(In_Team_Mode, True);
         Wait(5, Ignore Condition);
