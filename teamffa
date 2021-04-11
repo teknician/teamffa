@@ -49,10 +49,11 @@ variables {
         11: Team_3_Count
         12: Team_4_Count
         13: Player_Index
-        14: Array_Of_Teams
-        15: Array_Of_Team_Counts
-        16: Selector
-        17: In_Team_Mode
+        14: Tertiary_Player_Index
+        15: Array_Of_Teams
+        16: Array_Of_Team_Counts
+        17: Selector
+        18: In_Team_Mode
     player:
         0: Team_Membership
         1: Team_Index
@@ -97,6 +98,7 @@ rule ("Initialize variables") {
         Set Global Variable(Team_4, Empty Array);
         Set Global Variable(Array_Of_Teams, Array(Global.Team_1, Global.Team_2, Global.Team_3, Global.Team_4));
         Set Global Variable(Selector, 0);
+        Big Message(All Players(All Teams), Custom String("Variables were initialized.", Null, Null, Null));
     }
 }
 
@@ -121,6 +123,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
         Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
         Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
+        Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
     }
 }
 
@@ -165,6 +168,34 @@ rule ("Create and check team status") {
             Wait(0.016, Ignore Condition);
         End;
         Set Global Variable(Selector, 0);
+        Big Message(All Players(All Teams), Custom String("Team memberships have been created.", Null, Null, Null));
+    }
+}
+
+rule ("Assign team to players who join") {
+    event {
+        Player Joined Match;
+        All;
+        All;
+    }
+    conditions {
+        Is Game In Progress == True;
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Wait(3, Ignore Condition);
+        Set Global Variable(Team_1, Remove From Array(Global.Team_1, Null));
+        Set Global Variable(Team_2, Remove From Array(Global.Team_2, Null));
+        Set Global Variable(Team_3, Remove From Array(Global.Team_3, Null));
+        Set Global Variable(Team_4, Remove From Array(Global.Team_4, Null));
+        Set Global Variable(Team_1_Count, Count Of(Global.Team_1));
+        Set Global Variable(Team_2_Count, Count Of(Global.Team_2));
+        Set Global Variable(Team_3_Count, Count Of(Global.Team_3));
+        Set Global Variable(Team_4_Count, Count Of(Global.Team_4));
+        Set Global Variable(Array_Of_Team_Counts, Array(Global.Team_1_Count, Global.Team_2_Count, Global.Team_3_Count, Global.Team_4_Count));
+        Set Player Variable(Event Player, Smallest_Team, First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)));
+        Modify Player Variable(Event Player, Smallest_Team, Append To Array, Event Player);
+        Big Message(All Players(All Teams), Custom String("Player joined - they join a team", Null, Null, Null));
     }
 }
 
@@ -199,6 +230,7 @@ rule ("Find team membership") {
                 End;
             End;
         End;
+        Big Message(All Players(All Teams), Custom String("Team member relationships initialized.", Null, Null, Null));
     }
 }
 
@@ -211,33 +243,13 @@ rule ("Remove player from team array when leaving") {
         Global.In_Team_Mode != False;
     }
     actions {
-        If(Compare(All Players(All Teams), !=, Global.Players_In_Match));
-            Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Null));
-    }
-}
-
-rule ("Assign team to players who join") {
-    event {
-        Player Joined Match;
-        All;
-        All;
-    }
-    conditions {
-        Is Game In Progress == True;
-        Global.In_Team_Mode != False;
-    }
-    actions {
-        Set Global Variable(Team_1, Remove From Array(Global.Team_1, Null));
-        Set Global Variable(Team_2, Remove From Array(Global.Team_2, Null));
-        Set Global Variable(Team_3, Remove From Array(Global.Team_3, Null));
-        Set Global Variable(Team_4, Remove From Array(Global.Team_4, Null));
-        Set Global Variable(Team_1_Count, Count Of(Global.Team_1));
-        Set Global Variable(Team_2_Count, Count Of(Global.Team_2));
-        Set Global Variable(Team_3_Count, Count Of(Global.Team_3));
-        Set Global Variable(Team_4_Count, Count Of(Global.Team_4));
-        Set Global Variable(Array_Of_Team_Counts, Array(Global.Team_1_Count, Global.Team_2_Count, Global.Team_3_Count, Global.Team_4_Count));
-        Set Player Variable(Event Player, Smallest_Team, First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)));
-        Modify Player Variable(Event Player, Smallest_Team, Append To Array, Event Player);
+        If(Compare(Number Of Players(All Teams), <, Count Of(Global.Players_In_Match)));
+            For Global Variable(Tertiary_Player_Index, 0, Subtract(Count Of(Global.Players_In_Match), 1), 1);
+                If(Not(Array Contains(All Players(All Teams), Global.Tertiary_Player_Index)));
+                    Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Global.Player_Index));
+                    Big Message(All Players(All Teams), Custom String("Missing player removed from array.", Null, Null, Null));
+                End;
+            End;
     }
 }
 
