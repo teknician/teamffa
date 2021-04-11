@@ -85,6 +85,18 @@ rule ("Rule 1") {
     }
 }
 
+rule ("Fast setup") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Is In Setup == True;
+    }
+    actions {
+        Set Match Time(5);
+    }
+}
+
 rule ("Initialize variables") {
     event {
         Ongoing - Global;
