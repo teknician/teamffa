@@ -273,10 +273,10 @@ rule ("Prevent damage from teammates") {
         All;
     }
     conditions {
-        Array Contains(Global.Array_Of_Teams, Event Player) == True;
         Global.In_Team_Mode != False;
     }
     actions {
+        Wait(2.5, Ignore Condition);
         For Player Variable(Event Player, Index, 0, 3, 1);
             For Player Variable(Event Player, Secondary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Compare((Event Player).Index, ==, 0));
@@ -312,7 +312,7 @@ rule ("Teleport teams to the right coordinates") {
         Or(Or(Or(Compare(Count Of(Global.Team_1), >, 0), Compare(Count Of(Global.Team_2), >, 0)), Compare(Count Of(Global.Team_3), >, 0)), Compare(Count Of(Global.Team_4), >, 0)) == True;
     }
     actions {
-        Wait(10, Ignore Condition);
+        Wait(2.5, Ignore Condition);
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
         Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
         Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
