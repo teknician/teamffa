@@ -80,7 +80,7 @@ rule ("Rule 1") {
         Create HUD Text(All Players(All Teams), Custom String("Z: {0}", Z Component Of(Position Of(Event Player)), Null, Null), Null, Null, Left, 2, Color(White), Null, Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Players In Match: {0}\nArray of Teams: {1}\nTeam_1: {2}", Global.Players_In_Match, Global.Array_Of_Teams, Custom String("{0}\nTeam_2: {1}\nTeam_3: {2}", Global.Team_1, Global.Team_2, Custom String("{0}\nTeam_4: {1}", Global.Team_3, Global.Team_4, Null))), Null, Left, 3, Null, Color(Lime Green), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_1_Count: {0}\nTeam_2_Count: {1}\nTeam_3_Count: {2}", Global.Team_1_Count, Global.Team_2_Count, Custom String("{0}\nTeam_4_Count: {1}", Global.Team_3_Count, Global.Team_4_Count, Null)), Null, Left, 4, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts {1}\nIn Team Mode: {2}", (Event Player).Smallest_Team, Global.Array_Of_Team_Counts, Global.In_Team_Mode), Null, Left, 5, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts: {1}\nIn Team Mode: {2}", (Event Player).Smallest_Team, Global.Array_Of_Team_Counts, Global.In_Team_Mode), Null, Left, 5, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("1Vectors: {0}, {1}, {2}", First Of(Global.Team_1_Vectors), Value In Array(Global.Team_1_Vectors, 1), Value In Array(Global.Team_1_Vectors, 2)), Null, Right, 0, Null, Color(Yellow), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("2Vectors: {0}, {1}, {2}", First Of(Global.Team_2_Vectors), Value In Array(Global.Team_2_Vectors, 1), Value In Array(Global.Team_2_Vectors, 2)), Null, Right, 1, Null, Color(Red), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("3Vectors: {0}, {1}, {2}", First Of(Global.Team_3_Vectors), Value In Array(Global.Team_3_Vectors, 1), Value In Array(Global.Team_3_Vectors, 2)), Null, Right, 2, Null, Color(Blue), Null, Visible To and String, Default Visibility);
@@ -131,10 +131,18 @@ rule ("Wait 2 minutes before creating teams") {
         "Wait 2 minutes, then create teams for purposes of teleporting them\n to specified coordinates of Team_X_Vectors"
         Wait(15, Abort When False);
         Big Message(All Players(All Teams), Custom String("Creating teams!", Null, Null, Null));
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Tracer), All Teams, -1, Vector(0, 50, 0), Forward);
         Wait(1, Ignore Condition);
         Set Global Variable(In_Team_Mode, True);
         Wait(5, Ignore Condition);
-        Modify Global Variable(Team_1, Append To Array, First Of(Global.Players_In_Match));
     }
 }
 
