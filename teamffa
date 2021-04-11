@@ -186,30 +186,42 @@ rule ("Create and check team status") {
         End;
         Big Message(All Players(All Teams), Custom String("Team memberships created.", Null, Null, Null));
         Wait(0.25, Ignore Condition);
-        Create In-World Text(Global.Team_1, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_1_Nametags, 0, Last Text ID);
-        Create In-World Text(Global.Team_1, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_1, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 2)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_1, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_1_Nametags, 1, Last Text ID);
-        Create In-World Text(Global.Team_1, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_1, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 1)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_1, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_1_Nametags, 2, Last Text ID);
-        Create In-World Text(Global.Team_2, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Start Damage Modification(Array(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), First Of(Global.Team_1), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 2)), Value In Array(Global.Team_1, 1), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 1)), Value In Array(Global.Team_1, 2), 0.01, Receivers Damagers and Damage Percent);
+        Create In-World Text(Array(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_2_Nametags, 0, Last Text ID);
-        Create In-World Text(Global.Team_2, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 2)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_2_Nametags, 1, Last Text ID);
-        Create In-World Text(Global.Team_2, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 1)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_2_Nametags, 2, Last Text ID);
-        Create In-World Text(Global.Team_3, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_3), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Start Damage Modification(Array(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), First Of(Global.Team_1), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 2)), Value In Array(Global.Team_2, 1), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 1)), Value In Array(Global.Team_2, 2), 0.01, Receivers Damagers and Damage Percent);
+        Create In-World Text(Array(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_3), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_3_Nametags, 0, Last Text ID);
-        Create In-World Text(Global.Team_3, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 2)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_3_Nametags, 1, Last Text ID);
-        Create In-World Text(Global.Team_3, Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 1)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_3_Nametags, 2, Last Text ID);
-        Create In-World Text(Global.Team_4, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Start Damage Modification(Array(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), First Of(Global.Team_3), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 2)), Value In Array(Global.Team_3, 1), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 1)), Value In Array(Global.Team_3, 2), 0.01, Receivers Damagers and Damage Percent);
+        Create In-World Text(Array(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_4_Nametags, 0, Last Text ID);
-        Create In-World Text(Global.Team_4, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_4_Nametags, 1, Last Text ID);
-        Create In-World Text(Global.Team_4, Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
+        Create In-World Text(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 1)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_4_Nametags, 2, Last Text ID);
+        Start Damage Modification(Array(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), First Of(Global.Team_4), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 2)), Value In Array(Global.Team_4, 1), 0.01, Receivers Damagers and Damage Percent);
+        Start Damage Modification(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 1)), Value In Array(Global.Team_4, 2), 0.01, Receivers Damagers and Damage Percent);
         Wait(0.25, Ignore Condition);
         Set Global Variable(Team_1_Count, Count Of(Global.Team_1));
         Set Global Variable(Team_2_Count, Count Of(Global.Team_2));
@@ -263,42 +275,6 @@ rule ("Assign team to players who join") {
         Set Player Variable(Event Player, Smallest_Team, First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)));
         Modify Player Variable(Event Player, Smallest_Team, Append To Array, Event Player);
         Big Message(All Players(All Teams), Custom String("Player joined - they join a team", Null, Null, Null));
-    }
-}
-
-rule ("Prevent damage from teammates") {
-    event {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-    }
-    actions {
-        Wait(2.5, Ignore Condition);
-        For Player Variable(Event Player, Index, 0, 3, 1);
-            For Player Variable(Event Player, Secondary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-                If(Compare((Event Player).Index, ==, 0));
-                    Set Player Variable(Event Player, Membership_Index, Global.Team_1);
-                Else If(Compare((Event Player).Index, ==, 1));
-                    Set Player Variable(Event Player, Membership_Index, Global.Team_2);
-                Else If(Compare((Event Player).Index, ==, 2));
-                    Set Player Variable(Event Player, Membership_Index, Global.Team_3);
-                Else If(Compare((Event Player).Index, ==, 3));
-                    Set Player Variable(Event Player, Membership_Index, Global.Team_4);
-                End;
-                If(Array Contains((Event Player).Membership_Index, Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)));
-                    Set Player Variable(Event Player, Team_Membership, True);
-                Else;
-                    Set Player Variable(Event Player, Team_Membership, False);
-                End;
-                If(Compare((Event Player).Team_Membership, ==, True));
-                    Start Damage Modification(Remove From Array(Value In Array(Global.Array_Of_Teams, (Event Player).Index), Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index)), Value In Array(Global.Players_In_Match, (Event Player).Secondary_Player_Index), 0.001, Receivers and Damagers);
-                End;
-            End;
-        End;
-        Big Message(All Players(All Teams), Custom String("Team member relationships initialized.", Null, Null, Null));
     }
 }
 
