@@ -156,6 +156,7 @@ rule ("Create and check team status") {
                 Set Global Variable(Selector, 0);
             End;
             Wait(0.016, Ignore Condition);
+            Small Message(All Players(All Teams), Custom String("Player assigned team.", Null, Null, Null));
         End;
         Set Global Variable(Selector, 0);
         Big Message(All Players(All Teams), Custom String("Team memberships created.", Null, Null, Null));
