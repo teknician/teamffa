@@ -52,24 +52,28 @@ variables {
         14: Team_2_Nametags
         15: Team_3_Nametags
         16: Team_4_Nametags
-        17: Player_Index
-        18: Tertiary_Player_Index
-        19: Array_Of_Teams
-        20: Array_Of_Team_Counts
-        21: Selector
-        22: In_Team_Mode
+        17: Array_Of_Nametags
+        18: Player_Index
+        19: Tertiary_Player_Index
+        20: Array_Of_Teams
+        21: Array_Of_Team_Counts
+        22: Selector
+        23: In_Team_Mode
     player:
-        0: Team_Membership
-        1: Team_Index
-        2: Index
-        3: Membership_Index
-        4: Secondary_Player_Index
-        5: Smallest_Team
+        0: Target
+        1: Team_Membership
+        2: Team_Index
+        3: Index
+        4: Membership_Index
+        5: Secondary_Player_Index
+        6: Smallest_Team
+        7: Had_Final_Blow
+        8: Team_Assist_Victim
 }
 subroutines {
-    0: CreateTeams
+    0: FreeForAllReset
 }
-rule ("Rule 1") {
+rule ("Host Diagnostics") {
     event {
         Ongoing - Each Player;
         All;
@@ -109,7 +113,7 @@ rule ("Fast setup") {
     }
 }
 
-rule ("Initialize variables") {
+rule ("Initialize variables (and create dummies)") {
     event {
         Ongoing - Global;
     }
@@ -123,8 +127,20 @@ rule ("Initialize variables") {
         Set Global Variable(Team_3, Empty Array);
         Set Global Variable(Team_4, Empty Array);
         Set Global Variable(Array_Of_Teams, Array(Global.Team_1, Global.Team_2, Global.Team_3, Global.Team_4));
+        Set Global Variable(Array_Of_Nametags, Array(Global.Team_1_Nametags, Global.Team_2_Nametags, Global.Team_3_Nametags, Global.Team_4_Nametags));
         Set Global Variable(Selector, 0);
         Big Message(All Players(All Teams), Custom String("Variables were initialized.", Null, Null, Null));
+        Create Dummy Bot(Hero(Hanzo), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Mercy), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Mei), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Ana), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Ashe), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Echo), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Orisa), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(D.Va), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Genji), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Zarya), All Teams, -1, Vector(0, 50, 0), Forward);
+        Create Dummy Bot(Hero(Moira), All Teams, -1, Vector(0, 50, 0), Forward);
     }
 }
 
@@ -139,20 +155,12 @@ rule ("Wait 2 minutes before creating teams") {
         "Wait 2 minutes, then create teams for purposes of teleporting them\n to specified coordinates of Team_X_Vectors"
         Wait(10, Abort When False);
         Big Message(All Players(All Teams), Custom String("Creating teams!", Null, Null, Null));
-        Create Dummy Bot(Hero(Hanzo), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Mercy), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Mei), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Ana), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Ashe), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Echo), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Orisa), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(D.Va), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Genji), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Zarya), All Teams, -1, Vector(0, 50, 0), Forward);
-        Create Dummy Bot(Hero(Moira), All Teams, -1, Vector(0, 50, 0), Forward);
         Wait(1, Ignore Condition);
         Set Global Variable(In_Team_Mode, True);
-        Wait(5, Ignore Condition);
+        Wait(135, Abort When False);
+        Start Rule(FreeForAllReset, Do Nothing);
+        Wait(120, Abort When False);
+        Loop If Condition Is True;
     }
 }
 
@@ -292,19 +300,197 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
         Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
         Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_1_Vectors), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_1_Vectors), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_1_Vectors, 1), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_1_Vectors, 1), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_1_Vectors, 2), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_1_Vectors, 2), 100);
         Wait(0.016, Ignore Condition);
         Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
         Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
         Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_2_Vectors), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_2_Vectors), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_2_Vectors, 1), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_2_Vectors, 1), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_2_Vectors, 2), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_2_Vectors, 2), 100);
         Wait(0.016, Ignore Condition);
         Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
         Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
         Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_3_Vectors), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_3_Vectors), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_3_Vectors, 1), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_3_Vectors, 1), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_3_Vectors, 2), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_3_Vectors, 2), 100);
         Wait(0.016, Ignore Condition);
         Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
         Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
         Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_4_Vectors), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_4_Vectors), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 1), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_4_Vectors, 1), 100);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 1);
+        Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 100);
         Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
+        Wait(0.5, Ignore Condition);
+        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+            Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3.5);
+            Wait(0.016, Ignore Condition);
+        End;
+        Small Message(All Players(All Teams), Custom String("3...", Null, Null, Null));
+        Wait(1, Ignore Condition);
+        Small Message(All Players(All Teams), Custom String("2...", Null, Null, Null));
+        Wait(1, Ignore Condition);
+        Small Message(All Players(All Teams), Custom String("1...", Null, Null, Null));
+        Wait(1, Ignore Condition);
+        Small Message(All Players(All Teams), Custom String("GO!", Null, Null, Null));
+        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+            Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Buff Impact Sound, Color(Team 1), Position Of(Value In Array(Global.Players_In_Match, Global.Player_Index)), 200);
+            Wait(0.016, Ignore Condition);
+        End;
+    }
+}
+
+rule ("Final Blow Tracker") {
+    event {
+        Player Dealt Final Blow;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Set Player Variable(Victim, Had_Final_Blow, Attacker);
+        Set Player Variable(Attacker, Team_Assist_Victim, Victim);
+    }
+}
+
+rule ("Assisting a teammate gives the player a point") {
+    event {
+        Player Earned Elimination;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Victim != Null;
+        Victim == (Attacker).Team_Assist_Victim;
+        Attacker != (Victim).Had_Final_Blow;
+    }
+    actions {
+        Wait(1, Ignore Condition);
+        If(Or(Or(Or(And((Victim).Had_Final_Blow, Array Contains(Global.Team_1, Attacker)), And((Victim).Had_Final_Blow, Array Contains(Global.Team_2, Attacker))), And((Victim).Had_Final_Blow, Array Contains(Global.Team_3, Attacker))), And((Victim).Had_Final_Blow, Array Contains(Global.Team_4, Attacker))));
+            Modify Player Score(Attacker, 1);
+    }
+}
+
+rule ("Damage dealt by teammates is taken as healing") {
+    event {
+        Player Dealt Damage;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Or(Or(Or(And(First Of(Victim), Array Contains(Global.Team_1, Attacker)), And(First Of(Victim), Array Contains(Global.Team_2, Attacker))), And(First Of(Victim), Array Contains(Global.Team_3, Attacker))), And(First Of(Victim), Array Contains(Global.Team_4, Attacker))) == True;
+    }
+    actions {
+        Heal(Victim, Attacker, 3.5);
+        Wait(0.25, Ignore Condition);
+    }
+}
+
+rule ("Respawn teammates near each other after death") {
+    event {
+        Player Died;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Wait Until(Is Alive(Event Player), 10);
+        For Global Variable(Player_Index, 0, 3, 1);
+            For Player Variable(Event Player, Secondary_Player_Index, 0, Count Of(Value In Array(Global.Array_Of_Teams, Global.Player_Index)), 1);
+                If(Is Alive(Value In Array(Value In Array(Global.Array_Of_Teams, Global.Player_Index), (Event Player).Secondary_Player_Index)));
+                    Teleport(Event Player, Nearest Walkable Position(Add(Position Of(Value In Array(Value In Array(Global.Array_Of_Teams, Global.Player_Index), (Event Player).Secondary_Player_Index)), Vector(Random Integer(-8, 8), Random Integer(0, 4), Random Integer(-8, 8)))));
+                    Abort;
+                End;
+            End;
+        End;
+    }
+}
+
+rule ("Disable Abilities when teammate is under Reticle") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Is In View Angle(Event Player, Player Closest To Reticle(Event Player, All Teams), 12) == True;
+    }
+    actions {
+        Set Player Variable(Event Player, Target, Player Closest To Reticle(Event Player, Opposite Team Of(Team Of(Event Player))));
+        If(And(And(And(Is Alive((Event Player).Target), Is In Line of Sight(Event Player, (Event Player).Target, Enemy Barriers Block LOS)), Or(Or(Or(And((Event Player).Target, Array Contains(Global.Team_1, Event Player)), And((Event Player).Target, Array Contains(Global.Team_2, Event Player))), And((Event Player).Target, Array Contains(Global.Team_3, Event Player))), And((Event Player).Target, Array Contains(Global.Team_4, Event Player)))), Compare(Distance Between(Event Player, (Event Player).Target), <, 20)));
+            If(Array Contains(Array(Hero(Ana), Hero(Roadhog)), Hero Of(Event Player)));
+                Set Ability 1 Enabled(Event Player, False);
+            Else If(Array Contains(Array(Hero(McCree), Hero(Junkrat), Hero(Zenyatta)), Hero Of(Event Player)));
+                Set Ability 2 Enabled(Event Player, False);
+            Else If(Array Contains(Array(Hero(Mei)), Hero Of(Event Player)));
+                Set Primary Fire Enabled(Event Player, False);
+            Else If(Array Contains(Array(Hero(Sombra), Hero(Brigitte)), Hero Of(Event Player)));
+                Set Secondary Fire Enabled(Event Player, False);
+            Else If(Array Contains(Array(Hero(Reinhardt), Hero(Sombra), Hero(Mei), Hero(Zarya)), Hero Of(Event Player)));
+                Set Ultimate Ability Enabled(Event Player, False);
+            End;
+        Else;
+            Set Ability 1 Enabled(Event Player, True);
+            Set Ability 2 Enabled(Event Player, True);
+            Set Primary Fire Enabled(Event Player, True);
+            Set Secondary Fire Enabled(Event Player, True);
+            Set Ultimate Ability Enabled(Event Player, True);
+        End;
+        Wait(1, Ignore Condition);
+        Loop If Condition Is True;
+    }
+}
+
+rule ("Reset back to FFA settings") {
+    event {
+        Subroutine;
+        FreeForAllReset;
+    }
+    actions {
+        Set Global Variable(In_Team_Mode, False);
+        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+            Start Damage Modification(All Players(All Teams), Value In Array(Global.Players_In_Match, Global.Player_Index), 100, Receivers and Damagers);
+            Wait(0.016, Ignore Condition);
+        End;
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(0)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(0, 1)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(0, 2)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(1)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(1, 1)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(1, 2)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(2)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(2, 1)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(2, 2)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(3)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 1)));
+        Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 2)));
+        Set Global Variable(Team_1, Empty Array);
+        Set Global Variable(Team_2, Empty Array);
+        Set Global Variable(Team_3, Empty Array);
+        Set Global Variable(Team_4, Empty Array);
     }
 }
 
