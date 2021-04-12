@@ -60,6 +60,7 @@ variables {
         22: Selector
         23: In_Team_Mode
         24: Random_Player
+        25: Team_Assist_Victim
     player:
         0: Target
         1: Team_Membership
@@ -69,8 +70,7 @@ variables {
         5: Secondary_Player_Index
         6: Smallest_Team
         7: Had_Final_Blow
-        8: Team_Assist_Victim
-        9: Damage_Chase
+        8: Damage_Chase
 }
 subroutines {
     0: FreeForAllReset
@@ -409,7 +409,7 @@ rule ("Final Blow Tracker") {
     }
     actions {
         Set Player Variable(Victim, Had_Final_Blow, Attacker);
-        Set Player Variable(Attacker, Team_Assist_Victim, Victim);
+        Set Global Variable(Team_Assist_Victim, Victim);
     }
 }
 
@@ -422,11 +422,11 @@ rule ("Assisting a teammate gives the player a point") {
     conditions {
         Global.In_Team_Mode != False;
         Victim != Null;
-        Victim == (Attacker).Team_Assist_Victim;
+        Victim == Global.Team_Assist_Victim;
         Attacker != (Victim).Had_Final_Blow;
     }
     actions {
-        Wait(1, Ignore Condition);
+        Wait(0.25, Ignore Condition);
         If(Or(Or(Or(And((Victim).Had_Final_Blow, Array Contains(Global.Team_1, Attacker)), And((Victim).Had_Final_Blow, Array Contains(Global.Team_2, Attacker))), And((Victim).Had_Final_Blow, Array Contains(Global.Team_3, Attacker))), And((Victim).Had_Final_Blow, Array Contains(Global.Team_4, Attacker))));
             Modify Player Score(Attacker, 1);
     }
@@ -443,8 +443,8 @@ rule ("Damage dealt by teammates is taken as healing") {
         Or(Or(Or(And(First Of(Victim), Array Contains(Global.Team_1, Attacker)), And(First Of(Victim), Array Contains(Global.Team_2, Attacker))), And(First Of(Victim), Array Contains(Global.Team_3, Attacker))), And(First Of(Victim), Array Contains(Global.Team_4, Attacker))) == True;
     }
     actions {
-        Heal(Victim, Attacker, 3.5);
-        Wait(0.25, Ignore Condition);
+        Heal(Victim, Attacker, 6);
+        Wait(0.125, Ignore Condition);
     }
 }
 
