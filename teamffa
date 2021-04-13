@@ -168,7 +168,7 @@ rule ("Fast setup") {
         Is Assembling Heroes == True;
     }
     actions {
-        Set Match Time(5);
+        Set Match Time(12);
     }
 }
 
@@ -177,7 +177,7 @@ rule ("Initialize variables (and create dummies)") {
         Ongoing - Global;
     }
     actions {
-        Set Global Variable(Capture_Point_Vector, Vector(0, 0, 0));
+        Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.89, -9.6));
         Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
@@ -373,7 +373,7 @@ rule ("Teleport teams to the right coordinates") {
         Or(Or(Or(Compare(Count Of(Global.Team_1), >, 0), Compare(Count Of(Global.Team_2), >, 0)), Compare(Count Of(Global.Team_3), >, 0)), Compare(Count Of(Global.Team_4), >, 0)) == True;
     }
     actions {
-        Wait(2.5, Ignore Condition);
+        Wait(2, Ignore Condition);
         For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
             Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3);
             Wait(0.016, Ignore Condition);
@@ -450,17 +450,40 @@ rule ("Capture Point initialization") {
             Set Global Variable(Capture_Reverse, 0);
         Else If(Global.Is_Point_Contested);
             Set Global Variable(Capture_Reverse, 0);
-        End;
-        "Point is contested by any player"
+    }
+}
+
+rule ("Point is contested by any player") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
         Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 7.5, All Teams, Surfaces));
+        Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         If(Compare(Count Of(Global.Players_On_Point), >, 0));
             Set Global Variable(Is_Point_Contested, 1);
-            Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
+            If(Global.Only_One_Team);
+                Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
+            Else;
+                Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
+            End;
         Else;
             Set Global Variable(Is_Point_Contested, 0);
             Set Global Variable(Point_Text, Custom String("", Null, Null, Null));
-        End;
-        "Number of team members on point"
+    }
+}
+
+rule ("Number of team members on point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
         If(Compare(Global.Only_One_Team, ==, 1));
             Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
             If(Compare(Count Of(Global.Players_On_Point), ==, 1));
@@ -471,8 +494,6 @@ rule ("Capture Point initialization") {
                 Set Global Variable(Team_Members_On_Point, 3);
             End;
         End;
-        Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
-        Wait(0.25, Ignore Condition);
         Loop If Condition Is True;
     }
 }
@@ -637,12 +658,16 @@ rule ("Display capture progress for those on point") {
         Array Contains(Global.Players_On_Point, Event Player) == True;
     }
     actions {
-        Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 0, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
-        Set Player Variable(Event Player, Progress_Bar, Last Text ID);
+        If(Not(Entity Exists((Event Player).Progress_Bar)));
+            Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
+            Set Player Variable(Event Player, Progress_Bar, Last Text ID);
+        End;
         If(Array Contains(Array(100, 0), Global.Capture_Progress));
             Set Player Variable(Event Player, Player_Progress_Visibility, Null);
         Else;
             Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+        End;
+        Loop If Condition Is True;
     }
 }
 
@@ -654,14 +679,16 @@ rule ("Display capture progress for those away from point") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 2, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
-        Set Global Variable(Global_Progress_Bar, Last Text ID);
+        If(Not(Entity Exists(Global.Global_Progress_Bar)));
+            Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
+            Set Global Variable(Global_Progress_Bar, Last Text ID);
+        End;
         If(Array Contains(Array(100, 0), Global.Capture_Progress));
             Set Global Variable(Progress_Visibility, Null);
         Else;
             Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         End;
-        Wait(0.25, Ignore Condition);
+        Loop If Condition Is True;
     }
 }
 
