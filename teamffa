@@ -36,31 +36,45 @@ settings
 variables {
     global:
         0: Players_In_Match
-        1: Team_1_Vectors
-        2: Team_2_Vectors
-        3: Team_3_Vectors
-        4: Team_4_Vectors
-        5: Team_1
-        6: Team_2
-        7: Team_3
-        8: Team_4
-        9: Team_1_Count
-        10: Team_2_Count
-        11: Team_3_Count
-        12: Team_4_Count
-        13: Team_1_Nametags
-        14: Team_2_Nametags
-        15: Team_3_Nametags
-        16: Team_4_Nametags
-        17: Array_Of_Nametags
-        18: Player_Index
-        19: Tertiary_Player_Index
-        20: Array_Of_Teams
-        21: Array_Of_Team_Counts
-        22: Selector
-        23: In_Team_Mode
-        24: Random_Player
-        25: Team_Assist_Victim
+        1: Capture_Point_Vector
+        2: Team_1_Vectors
+        3: Team_2_Vectors
+        4: Team_3_Vectors
+        5: Team_4_Vectors
+        6: Team_1
+        7: Team_2
+        8: Team_3
+        9: Team_4
+        10: Team_1_Count
+        11: Team_2_Count
+        12: Team_3_Count
+        13: Team_4_Count
+        14: Team_1_Nametags
+        15: Team_2_Nametags
+        16: Team_3_Nametags
+        17: Team_4_Nametags
+        18: Array_Of_Nametags
+        19: Player_Index
+        20: Tertiary_Player_Index
+        21: Array_Of_Teams
+        22: Array_Of_Team_Counts
+        23: Selector
+        24: In_Team_Mode
+        25: Random_Player
+        26: Capture_Progress
+        27: Point_Belongs_To
+        28: Is_Point_Contested
+        29: Players_On_Point
+        30: Team_Members_On_Point
+        31: Only_One_Team
+        32: Capture_Reverse
+        33: Capture_Color
+        34: Ring_FX
+        35: Lightshaft_FX
+        36: Shaft_Color
+        37: Point_Text
+        38: Global_Progress_Bar
+        39: Progress_Visibility
     player:
         0: Target
         1: Team_Membership
@@ -69,8 +83,11 @@ variables {
         4: Membership_Index
         5: Secondary_Player_Index
         6: Smallest_Team
-        7: Had_Final_Blow
-        8: Damage_Chase
+        7: Eliminator
+        8: Team_Num
+        9: Player_Progress_Visibility
+        10: Damage_Chase
+        11: Progress_Bar
 }
 subroutines {
     0: FreeForAllReset
@@ -160,6 +177,8 @@ rule ("Initialize variables (and create dummies)") {
         Ongoing - Global;
     }
     actions {
+        Set Global Variable(Capture_Point_Vector, Vector(0, 0, 0));
+        Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
         Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(-10, 5.84, 6), Vector(-1, 6, 18)));
@@ -222,12 +241,16 @@ rule ("Create and check team status") {
             Modify Global Variable(Selector, Add, 1);
             If(Compare(Global.Selector, ==, 1));
                 Modify Global Variable(Team_1, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+                Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Team_Num, 1);
             Else If(Compare(Global.Selector, ==, 2));
                 Modify Global Variable(Team_2, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+                Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Team_Num, 2);
             Else If(Compare(Global.Selector, ==, 3));
                 Modify Global Variable(Team_3, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+                Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Team_Num, 3);
             Else If(Compare(Global.Selector, ==, 4));
                 Modify Global Variable(Team_4, Append To Array, Value In Array(Global.Players_In_Match, Global.Player_Index));
+                Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Team_Num, 4);
                 Set Global Variable(Selector, 0);
             End;
             "Array_Of_Teams[Selector].append(Players_In_Match[Player_Index])"
@@ -245,6 +268,9 @@ rule ("Create and check team status") {
         Start Damage Modification(Array(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), First Of(Global.Team_1), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 2)), Value In Array(Global.Team_1, 1), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 1)), Value In Array(Global.Team_1, 2), 0.01, Receivers Damagers and Damage Percent);
+        Start Forcing Player Outlines(First Of(Global.Team_1), Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_1, 1), Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_1, 2), Array(First Of(Global.Team_1), Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), True, Color(Green), Always);
         Create In-World Text(Array(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_2), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_2_Nametags, 0, Last Text ID);
         Create In-World Text(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 2)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_2, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
@@ -254,6 +280,9 @@ rule ("Create and check team status") {
         Start Damage Modification(Array(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), First Of(Global.Team_1), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 2)), Value In Array(Global.Team_2, 1), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 1)), Value In Array(Global.Team_2, 2), 0.01, Receivers Damagers and Damage Percent);
+        Start Forcing Player Outlines(First Of(Global.Team_2), Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_2, 1), Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_2, 2), Array(First Of(Global.Team_2), Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), True, Color(Green), Always);
         Create In-World Text(Array(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_3), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_3_Nametags, 0, Last Text ID);
         Create In-World Text(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 2)), Custom String("Teammate", Null, Null, Null), Value In Array(Global.Team_3, 1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
@@ -263,6 +292,9 @@ rule ("Create and check team status") {
         Start Damage Modification(Array(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), First Of(Global.Team_3), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 2)), Value In Array(Global.Team_3, 1), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 1)), Value In Array(Global.Team_3, 2), 0.01, Receivers Damagers and Damage Percent);
+        Start Forcing Player Outlines(First Of(Global.Team_3), Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_3, 1), Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_3, 2), Array(First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), True, Color(Green), Always);
         Create In-World Text(Array(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_4_Nametags, 0, Last Text ID);
         Create In-World Text(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_4), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
@@ -272,6 +304,9 @@ rule ("Create and check team status") {
         Start Damage Modification(Array(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), First Of(Global.Team_4), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 2)), Value In Array(Global.Team_4, 1), 0.01, Receivers Damagers and Damage Percent);
         Start Damage Modification(Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 1)), Value In Array(Global.Team_4, 2), 0.01, Receivers Damagers and Damage Percent);
+        Start Forcing Player Outlines(First Of(Global.Team_4), Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_4, 1), Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), True, Color(Green), Always);
+        Start Forcing Player Outlines(Value In Array(Global.Team_4, 2), Array(First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), True, Color(Green), Always);
         Wait(0.25, Ignore Condition);
         Set Global Variable(Team_1_Count, Count Of(Global.Team_1));
         Set Global Variable(Team_2_Count, Count Of(Global.Team_2));
@@ -339,39 +374,44 @@ rule ("Teleport teams to the right coordinates") {
     }
     actions {
         Wait(2.5, Ignore Condition);
+        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+            Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3);
+            Wait(0.016, Ignore Condition);
+        End;
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
         Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
         Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
-        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_1_Vectors), 1);
+        Wait(0.5, Ignore Condition);
+        Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_1_Vectors), 5);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_1_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_1_Vectors, 1), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_1_Vectors, 1), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_1_Vectors, 2), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_1_Vectors, 2), 100);
-        Wait(0.016, Ignore Condition);
         Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
         Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
         Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
+        Wait(0.5, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_2_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_2_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_2_Vectors, 1), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_2_Vectors, 1), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_2_Vectors, 2), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_2_Vectors, 2), 100);
-        Wait(0.016, Ignore Condition);
         Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
         Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
         Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
+        Wait(0.5, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_3_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_3_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_3_Vectors, 1), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_3_Vectors, 1), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_3_Vectors, 2), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_3_Vectors, 2), 100);
-        Wait(0.016, Ignore Condition);
         Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
         Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
         Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
+        Wait(0.5, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_4_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_4_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 1), 1);
@@ -380,10 +420,6 @@ rule ("Teleport teams to the right coordinates") {
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 100);
         Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
         Wait(0.5, Ignore Condition);
-        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-            Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3.5);
-            Wait(0.016, Ignore Condition);
-        End;
         Small Message(All Players(All Teams), Custom String("3...", Null, Null, Null));
         Wait(1, Ignore Condition);
         Small Message(All Players(All Teams), Custom String("2...", Null, Null, Null));
@@ -398,6 +434,252 @@ rule ("Teleport teams to the right coordinates") {
     }
 }
 
+rule ("Capture Point initialization") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        "Reverse capture progress when no players contesting"
+        If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
+            Wait(3, Ignore Condition);
+            Set Global Variable(Capture_Reverse, 45);
+            Wait Until(Compare(Global.Capture_Progress, ==, 0), 9999);
+            Set Global Variable(Capture_Reverse, 0);
+        Else If(Global.Is_Point_Contested);
+            Set Global Variable(Capture_Reverse, 0);
+        End;
+        "Point is contested by any player"
+        Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 7.5, All Teams, Surfaces));
+        If(Compare(Count Of(Global.Players_On_Point), >, 0));
+            Set Global Variable(Is_Point_Contested, 1);
+            Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
+        Else;
+            Set Global Variable(Is_Point_Contested, 0);
+            Set Global Variable(Point_Text, Custom String("", Null, Null, Null));
+        End;
+        "Number of team members on point"
+        If(Compare(Global.Only_One_Team, ==, 1));
+            Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
+            If(Compare(Count Of(Global.Players_On_Point), ==, 1));
+                Set Global Variable(Team_Members_On_Point, 1);
+            Else If(Compare(Count Of(Global.Players_On_Point), ==, 2));
+                Set Global Variable(Team_Members_On_Point, 2);
+            Else If(Compare(Count Of(Global.Players_On_Point), ==, 3));
+                Set Global Variable(Team_Members_On_Point, 3);
+            End;
+        End;
+        Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        Wait(0.25, Ignore Condition);
+        Loop If Condition Is True;
+    }
+}
+
+rule ("Only one team is capturing the point") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        "Only one team is capturing the point"
+        Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+        If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
+            Set Global Variable(Only_One_Team, 0);
+        Else;
+            Set Global Variable(Only_One_Team, 1);
+        End;
+        Wait(0.25, Ignore Condition);
+        Loop If Condition Is True;
+    }
+}
+
+rule ("Capture Color") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        If(Global.Only_One_Team);
+            "green"
+            If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 1));
+                Set Global Variable(Capture_Color, Custom Color(110, 200, 110, 255));
+            "light blue"
+            Else If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 2));
+                Set Global Variable(Capture_Color, Custom Color(173, 216, 230, 255));
+            "yellow"
+            Else If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 3));
+                Set Global Variable(Capture_Color, Custom Color(245, 245, 0, 255));
+            "maroon"
+            Else If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 4));
+                Set Global Variable(Capture_Color, Custom Color(148, 0, 67, 255));
+            End;
+        Else If(Not(Global.Only_One_Team));
+            Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
+    }
+}
+
+rule ("Light Shaft Flash") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        If(Global.Is_Point_Contested);
+            Set Global Variable(Shaft_Color, Global.Capture_Color);
+        Else;
+            Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 50));
+    }
+}
+
+rule ("Capture Point Progress") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Players_On_Point > 0;
+    }
+    actions {
+        Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
+        Wait(0.016, Ignore Condition);
+        Wait Until(Array Contains(Array(100, 0), Global.Capture_Progress), 99999);
+        Stop Chasing Global Variable(Capture_Progress);
+        Wait(0.016, Ignore Condition);
+        Set Global Variable(Capture_Progress, 0);
+    }
+}
+
+rule ("Whoever captured the point gets 1 score every ten seconds") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Capture_Progress == 100;
+    }
+    actions {
+        Set Global Variable(Point_Belongs_To, (First Of(Global.Players_On_Point)).Team_Num);
+        If(True);
+        Skip(Value In Array(Array(45, 0, 11, 22, 33, 44), Add(1, Index Of Array Value(Array(1, 2, 3, 4, Null), Global.Point_Belongs_To))));
+        //__label_switch_2_0__:
+        Big Message(All Players(All Teams), Custom String("Team 1 Captured the point!", Null, Null, Null));
+        While(Compare(Global.Point_Belongs_To, ==, 1));
+            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 1));
+                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                End;
+            End;
+            Wait(10, Ignore Condition);
+        End;
+        Else;
+        //__label_switch_2_1__:
+        Big Message(All Players(All Teams), Custom String("Team 2 Captured the point!", Null, Null, Null));
+        While(Compare(Global.Point_Belongs_To, ==, 2));
+            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 2));
+                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                End;
+            End;
+            Wait(10, Ignore Condition);
+        End;
+        Else;
+        //__label_switch_2_2__:
+        Big Message(All Players(All Teams), Custom String("Team 3 Captured the point!", Null, Null, Null));
+        While(Compare(Global.Point_Belongs_To, ==, 3));
+            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 3));
+                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                End;
+            End;
+            Wait(10, Ignore Condition);
+        End;
+        Else;
+        //__label_switch_2_3__:
+        Big Message(All Players(All Teams), Custom String("Team 4 Captured the point!", Null, Null, Null));
+        While(Compare(Global.Point_Belongs_To, ==, 4));
+            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 4));
+                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                End;
+            End;
+            Wait(10, Ignore Condition);
+        End;
+        Else;
+        //__label_switch_2_4__:
+        Else;
+        //__label_switch_2_default__:
+        End;
+        Wait(1, Ignore Condition);
+    }
+}
+
+rule ("Display capture progress for those on point") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Array Contains(Global.Players_On_Point, Event Player) == True;
+    }
+    actions {
+        Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 0, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
+        Set Player Variable(Event Player, Progress_Bar, Last Text ID);
+        If(Array Contains(Array(100, 0), Global.Capture_Progress));
+            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
+        Else;
+            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+    }
+}
+
+rule ("Display capture progress for those away from point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 2, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
+        Set Global Variable(Global_Progress_Bar, Last Text ID);
+        If(Array Contains(Array(100, 0), Global.Capture_Progress));
+            Set Global Variable(Progress_Visibility, Null);
+        Else;
+            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        End;
+        Wait(0.25, Ignore Condition);
+    }
+}
+
+rule ("Create Ring and Light Shaft for Point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        Create Effect(All Players(All Teams), Ring, Global.Capture_Color, Global.Capture_Point_Vector, 7.5, Visible To and Color);
+        Set Global Variable(Ring_FX, Last Created Entity);
+        Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 7.5, Visible To and Color);
+        Set Global Variable(Lightshaft_FX, Last Created Entity);
+    }
+}
+
 rule ("Final Blow Tracker") {
     event {
         Player Dealt Final Blow;
@@ -408,8 +690,7 @@ rule ("Final Blow Tracker") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Set Player Variable(Victim, Had_Final_Blow, Attacker);
-        Set Global Variable(Team_Assist_Victim, Victim);
+        Set Player Variable(Victim, Eliminator, Attacker);
     }
 }
 
@@ -422,13 +703,12 @@ rule ("Assisting a teammate gives the player a point") {
     conditions {
         Global.In_Team_Mode != False;
         Victim != Null;
-        Victim == Global.Team_Assist_Victim;
-        Attacker != (Victim).Had_Final_Blow;
+        Attacker != (Victim).Eliminator;
+        ((Victim).Eliminator).Team_Num == (Attacker).Team_Num;
     }
     actions {
         Wait(0.25, Ignore Condition);
-        If(Or(Or(Or(And((Victim).Had_Final_Blow, Array Contains(Global.Team_1, Attacker)), And((Victim).Had_Final_Blow, Array Contains(Global.Team_2, Attacker))), And((Victim).Had_Final_Blow, Array Contains(Global.Team_3, Attacker))), And((Victim).Had_Final_Blow, Array Contains(Global.Team_4, Attacker))));
-            Modify Player Score(Attacker, 1);
+        Modify Player Score(Attacker, 1);
     }
 }
 
@@ -443,7 +723,7 @@ rule ("Damage dealt by teammates is taken as healing") {
         Or(Or(Or(And(First Of(Victim), Array Contains(Global.Team_1, Attacker)), And(First Of(Victim), Array Contains(Global.Team_2, Attacker))), And(First Of(Victim), Array Contains(Global.Team_3, Attacker))), And(First Of(Victim), Array Contains(Global.Team_4, Attacker))) == True;
     }
     actions {
-        Heal(Victim, Attacker, 6);
+        Heal(Victim, Attacker, 9);
         Wait(0.125, Ignore Condition);
     }
 }
@@ -479,6 +759,9 @@ rule ("Reset back to FFA settings") {
         Set Global Variable(In_Team_Mode, False);
         For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
             Start Damage Modification(All Players(All Teams), Value In Array(Global.Players_In_Match, Global.Player_Index), 100, Receivers and Damagers);
+            Stop Forcing Player Outlines(Value In Array(Global.Players_In_Match, Global.Player_Index), All Players(All Teams));
+            Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Team_Num, 0);
+            Destroy HUD Text((Value In Array(Global.Players_In_Match, Global.Player_Index)).Progress_Bar);
             Wait(0.016, Ignore Condition);
         End;
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(0)));
@@ -493,6 +776,9 @@ rule ("Reset back to FFA settings") {
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(3)));
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 1)));
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 2)));
+        Destroy In-World Text(Global.Global_Progress_Bar);
+        Destroy Effect(Global.Ring_FX);
+        Destroy Effect(Global.Lightshaft_FX);
         Set Global Variable(Team_1, Empty Array);
         Set Global Variable(Team_2, Empty Array);
         Set Global Variable(Team_3, Empty Array);
