@@ -521,12 +521,14 @@ rule ("Only one team is capturing the point") {
     actions {
         "Only one team is capturing the point"
         Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
-        If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
+        If(Compare(Count Of(Global.Players_On_Point), ==, 1));
+            Set Global Variable(Only_One_Team, 1);
+        Else If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
             Set Global Variable(Only_One_Team, 0);
         Else;
             Set Global Variable(Only_One_Team, 1);
         End;
-        Wait(0.1, Ignore Condition);
+        Wait(0.5, Ignore Condition);
     }
 }
 
@@ -553,9 +555,6 @@ rule ("Number of team members on point") {
             Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
         Else;
             Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
-        End;
-        Wait(0.1, Ignore Condition);
-        Loop If Condition Is True;
     }
 }
 
