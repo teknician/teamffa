@@ -449,24 +449,13 @@ rule ("Initialize Players on Point") {
     }
     actions {
         Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 6, All Teams, Off));
-        Wait(1.5, Ignore Condition);
-        Loop If Condition Is True;
-    }
-}
-
-rule ("Is point contested?") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-    }
-    actions {
         If(Compare(Count Of(Global.Players_On_Point), >, 0));
             Set Global Variable(Is_Point_Contested, 1);
         Else;
             Set Global Variable(Is_Point_Contested, 0);
+        End;
+        Wait(1.5, Ignore Condition);
+        Loop If Condition Is True;
     }
 }
 
