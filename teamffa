@@ -177,7 +177,7 @@ rule ("Initialize variables (and create dummies)") {
         Ongoing - Global;
     }
     actions {
-        Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.89, -9.6));
+        Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
         Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
@@ -463,7 +463,7 @@ rule ("Point is contested by any player") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 7.5, All Teams, Surfaces));
+        Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 6, All Teams, Surfaces));
         Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         If(Compare(Count Of(Global.Players_On_Point), >, 0));
             Set Global Variable(Is_Point_Contested, 1);
@@ -577,7 +577,7 @@ rule ("Capture Point Progress") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Global.Players_On_Point > 0;
+        Global.Players_On_Point >= 1;
     }
     actions {
         Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
@@ -587,74 +587,6 @@ rule ("Capture Point Progress") {
         Wait(0.016, Ignore Condition);
         Set Global Variable(Capture_Progress, 0);
         Wait(0.1, Ignore Condition);
-    }
-}
-
-rule ("Whoever captured the point gets 1 score every ten seconds") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Capture_Progress == 100;
-    }
-    actions {
-        Set Global Variable(Point_Belongs_To, (First Of(Global.Players_On_Point)).Team_Num);
-        If(True);
-        Skip(Value In Array(Array(45, 0, 11, 22, 33, 44), Add(1, Index Of Array Value(Array(1, 2, 3, 4, Null), Global.Point_Belongs_To))));
-        //__label_switch_2_0__:
-        Big Message(All Players(All Teams), Custom String("Team 1 Captured the point!", Null, Null, Null));
-        While(Compare(Global.Point_Belongs_To, ==, 1));
-            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 1));
-                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
-                End;
-            End;
-            Wait(10, Ignore Condition);
-        End;
-        Else;
-        //__label_switch_2_1__:
-        Big Message(All Players(All Teams), Custom String("Team 2 Captured the point!", Null, Null, Null));
-        While(Compare(Global.Point_Belongs_To, ==, 2));
-            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 2));
-                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
-                End;
-            End;
-            Wait(10, Ignore Condition);
-        End;
-        Else;
-        //__label_switch_2_2__:
-        Big Message(All Players(All Teams), Custom String("Team 3 Captured the point!", Null, Null, Null));
-        While(Compare(Global.Point_Belongs_To, ==, 3));
-            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 3));
-                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
-                End;
-            End;
-            Wait(10, Ignore Condition);
-        End;
-        Else;
-        //__label_switch_2_3__:
-        Big Message(All Players(All Teams), Custom String("Team 4 Captured the point!", Null, Null, Null));
-        While(Compare(Global.Point_Belongs_To, ==, 4));
-            For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-                If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 4));
-                    Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
-                End;
-            End;
-            Wait(10, Ignore Condition);
-        End;
-        Else;
-        //__label_switch_2_4__:
-        Else;
-        //__label_switch_2_default__:
-        End;
-        Wait(1, Ignore Condition);
     }
 }
 
@@ -669,13 +601,8 @@ rule ("Display capture progress for those on point") {
     }
     actions {
         If(Not(Entity Exists((Event Player).Progress_Bar)));
-            Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
+            Create Progress Bar HUD Text(Event Player, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
             Set Player Variable(Event Player, Progress_Bar, Last Text ID);
-        End;
-        If(Array Contains(Array(100, 0), Global.Capture_Progress));
-            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-        Else;
-            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
         End;
         Wait(0.1, Ignore Condition);
     }
