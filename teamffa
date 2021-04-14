@@ -69,7 +69,7 @@ variables {
         31: Only_One_Team
         32: Capture_Reverse
         33: Capture_Color
-        34: Ring_FX
+        34: Sparkle_FX
         35: Lightshaft_FX
         36: Shaft_Color
         37: Point_Text
@@ -180,6 +180,8 @@ rule ("Initialize variables (and create dummies)") {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
         Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         Set Global Variable(Capture_Progress, 0);
+        Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 6, All Teams, Off));
+        Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
         Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(-10, 5.84, 6), Vector(-1, 6, 18)));
@@ -627,9 +629,9 @@ rule ("Create Ring and Light Shaft for Point") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Create Effect(All Players(All Teams), Ring, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 8, Visible To and Color);
-        Set Global Variable(Ring_FX, Last Created Entity);
-        Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6.1, Visible To and Color);
+        Create Effect(All Players(All Teams), Sparkles, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 6, Visible To and Color);
+        Set Global Variable(Sparkle_FX, Last Created Entity);
+        Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6, Visible To and Color);
         Set Global Variable(Lightshaft_FX, Last Created Entity);
         Wait(0.1, Ignore Condition);
     }
@@ -732,7 +734,7 @@ rule ("Reset back to FFA settings") {
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 1)));
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 2)));
         Destroy In-World Text(Global.Global_Progress_Bar);
-        Destroy Effect(Global.Ring_FX);
+        Destroy Effect(Global.Sparkle_FX);
         Destroy Effect(Global.Lightshaft_FX);
         Set Global Variable(Team_1, Empty Array);
         Set Global Variable(Team_2, Empty Array);
