@@ -259,9 +259,8 @@ rule ("Create and check team status") {
             End;
             "Array_Of_Teams[Selector].append(Players_In_Match[Player_Index])"
             Wait(0.016, Ignore Condition);
-            Small Message(All Players(All Teams), Custom String("Player assigned team.", Null, Null, Null));
         End;
-        Big Message(All Players(All Teams), Custom String("Team memberships created.", Null, Null, Null));
+        "bigMessage(getAllPlayers(), \"Team memberships created.\")"
         Wait(0.25, Ignore Condition);
         Create In-World Text(Array(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), Custom String("Teammate", Null, Null, Null), First Of(Global.Team_1), 1, Clip Against Surfaces, Visible To Position and String, Color(Green), Default Visibility);
         Set Global Variable At Index(Team_1_Nametags, 0, Last Text ID);
@@ -333,7 +332,6 @@ rule ("Remove player from team array when leaving") {
         For Global Variable(Tertiary_Player_Index, 0, Count Of(Global.Players_In_Match), 1);
             If(Not(Array Contains(All Players(All Teams), Value In Array(Global.Players_In_Match, Global.Tertiary_Player_Index))));
                 Set Global Variable(Players_In_Match, Remove From Array(Global.Players_In_Match, Global.Player_Index));
-                Big Message(All Players(All Teams), Custom String("Missing player removed from array.", Null, Null, Null));
             End;
         End;
     }
@@ -363,7 +361,6 @@ rule ("Assign team to players who join") {
         Set Global Variable(Array_Of_Team_Counts, Array(Global.Team_1_Count, Global.Team_2_Count, Global.Team_3_Count, Global.Team_4_Count));
         Set Player Variable(Event Player, Smallest_Team, First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)));
         Modify Player Variable(Event Player, Smallest_Team, Append To Array, Event Player);
-        Big Message(All Players(All Teams), Custom String("Player joined - they join a team", Null, Null, Null));
     }
 }
 
@@ -378,19 +375,19 @@ rule ("Teleport teams to the right coordinates") {
     }
     actions {
         Wait(1.5, Ignore Condition);
-        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
-            Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3);
-            Wait(0.016, Ignore Condition);
-        End;
         Small Message(All Players(All Teams), Custom String("3...", Null, Null, Null));
         Wait(1, Ignore Condition);
         Small Message(All Players(All Teams), Custom String("2...", Null, Null, Null));
         Wait(1, Ignore Condition);
         Small Message(All Players(All Teams), Custom String("1...", Null, Null, Null));
+        For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
+            Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3);
+            Wait(0.016, Ignore Condition);
+        End;
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
         Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
         Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
-        Wait(0.1, Ignore Condition);
+        Wait(0.05, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_1_Vectors), 5);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_1_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_1_Vectors, 1), 1);
@@ -400,7 +397,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
         Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
         Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
-        Wait(0.1, Ignore Condition);
+        Wait(0.05, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_2_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_2_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_2_Vectors, 1), 1);
@@ -410,7 +407,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
         Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
         Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
-        Wait(0.1, Ignore Condition);
+        Wait(0.05, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_3_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_3_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_3_Vectors, 1), 1);
@@ -420,7 +417,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
         Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
         Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
-        Wait(0.1, Ignore Condition);
+        Wait(0.05, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_4_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_4_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 1), 1);
@@ -428,8 +425,8 @@ rule ("Teleport teams to the right coordinates") {
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 100);
         Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
-        Wait(0.1, Ignore Condition);
-        Wait(0.5, Ignore Condition);
+        Wait(0.05, Ignore Condition);
+        Wait(1, Ignore Condition);
         Small Message(All Players(All Teams), Custom String("GO!", Null, Null, Null));
         For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
             Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Buff Impact Sound, Color(Team 1), Position Of(Value In Array(Global.Players_In_Match, Global.Player_Index)), 200);
@@ -520,6 +517,28 @@ rule ("Capture Point Progress") {
     }
 }
 
+rule ("Reverse capture progress when no player is on the point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) == 0;
+    }
+    actions {
+        "Reverse capture progress when no players contesting"
+        If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
+            Wait(3, Ignore Condition);
+            Set Global Variable(Capture_Reverse, 45);
+        End;
+        If(Global.Is_Point_Contested);
+            Set Global Variable(Capture_Reverse, 0);
+        End;
+        Wait(0.5, Ignore Condition);
+    }
+}
+
 rule ("Capture Color") {
     event {
         Ongoing - Global;
@@ -599,47 +618,6 @@ rule ("Display capture progress for those away from point") {
     }
 }
 
-rule ("Light Shaft Flash") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-    }
-    actions {
-        While(Global.Is_Point_Contested);
-            Set Global Variable(Shaft_Color, Global.Capture_Color);
-            Wait(0.5, Ignore Condition);
-            Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
-            Wait(0.5, Ignore Condition);
-        End;
-        Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
-        Wait(0.1, Ignore Condition);
-    }
-}
-
-rule ("Reverse capture progress when no player is on the point") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-    }
-    actions {
-        "Reverse capture progress when no players contesting"
-        If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
-            Wait(3, Ignore Condition);
-            Set Global Variable(Capture_Reverse, 45);
-        End;
-        If(Global.Is_Point_Contested);
-            Set Global Variable(Capture_Reverse, 0);
-        End;
-        Wait(0.5, Ignore Condition);
-    }
-}
-
 rule ("Create Ring and Light Shaft for Point") {
     event {
         Ongoing - Global;
@@ -656,6 +634,26 @@ rule ("Create Ring and Light Shaft for Point") {
             Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6, Visible To and Color);
             Set Global Variable(Lightshaft_FX, Last Created Entity);
         End;
+        Wait(0.1, Ignore Condition);
+    }
+}
+
+rule ("Light Shaft Flash") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+    }
+    actions {
+        While(Global.Is_Point_Contested);
+            Set Global Variable(Shaft_Color, Global.Capture_Color);
+            Wait(0.5, Ignore Condition);
+            Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
+            Wait(0.5, Ignore Condition);
+        End;
+        Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
         Wait(0.1, Ignore Condition);
     }
 }
