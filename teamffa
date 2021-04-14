@@ -179,6 +179,7 @@ rule ("Initialize variables (and create dummies)") {
     actions {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
         Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
+        Set Global Variable(Capture_Progress, 0);
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
         Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(-10, 5.84, 6), Vector(-1, 6, 18)));
@@ -434,6 +435,25 @@ rule ("Teleport teams to the right coordinates") {
     }
 }
 
+rule ("Capture Point Progress") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Players_On_Point >= 1;
+    }
+    actions {
+        Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
+        Wait(0.016, Ignore Condition);
+        Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
+        Stop Chasing Global Variable(Capture_Progress);
+        Wait(1, Ignore Condition);
+        Set Global Variable(Capture_Progress, 0);
+        Wait(0.1, Ignore Condition);
+    }
+}
+
 rule ("Point is contested by any player") {
     event {
         Ongoing - Global;
@@ -542,30 +562,32 @@ rule ("Light Shaft Flash") {
         While(Global.Is_Point_Contested);
             Set Global Variable(Shaft_Color, Global.Capture_Color);
             Wait(0.5, Ignore Condition);
-            Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 50));
+            Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
             Wait(0.5, Ignore Condition);
         End;
-        Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 50));
+        Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
         Wait(0.1, Ignore Condition);
     }
 }
 
-rule ("Capture Point Progress") {
+rule ("Reverse capture progress when no player is on the point") {
     event {
         Ongoing - Global;
     }
     conditions {
         Global.In_Team_Mode != False;
-        Global.Players_On_Point >= 1;
     }
     actions {
-        Chase Global Variable At Rate(Capture_Progress, 100, Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Destination and Rate);
-        Wait(0.016, Ignore Condition);
-        Wait Until(Array Contains(Array(100, 0), Global.Capture_Progress), 99999);
-        Stop Chasing Global Variable(Capture_Progress);
-        Wait(0.016, Ignore Condition);
-        Set Global Variable(Capture_Progress, 0);
-        Wait(0.1, Ignore Condition);
+        "Reverse capture progress when no players contesting"
+        If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
+            Wait(3, Ignore Condition);
+            Set Global Variable(Capture_Reverse, 45);
+            Wait Until(Compare(Global.Capture_Progress, ==, 0), 9999);
+            Set Global Variable(Capture_Reverse, 0);
+        Else If(Global.Is_Point_Contested);
+            Set Global Variable(Capture_Reverse, 0);
+        End;
+        Wait(0.5, Ignore Condition);
     }
 }
 
@@ -583,10 +605,10 @@ rule ("Display capture progress for those on point") {
             Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
             Set Player Variable(Event Player, Progress_Bar, Last Text ID);
         End;
-        If(Array Contains(Array(100, 0), Global.Capture_Progress));
-            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-        Else;
+        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
             Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+        Else;
+            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
         End;
         Wait(0.1, Ignore Condition);
     }
@@ -600,10 +622,10 @@ rule ("Display capture progress for those away from point") {
         Global.In_Team_Mode != False;
     }
     actions {
-        If(Array Contains(Array(100, 0), Global.Capture_Progress));
-            Set Global Variable(Progress_Visibility, Null);
-        Else;
+        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
             Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        Else;
+            Set Global Variable(Progress_Visibility, Null);
         End;
         If(Not(Entity Exists(Global.Global_Progress_Bar)));
             Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
@@ -621,9 +643,9 @@ rule ("Create Ring and Light Shaft for Point") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Create Effect(All Players(All Teams), Ring, Global.Capture_Color, Global.Capture_Point_Vector, 7.5, Visible To and Color);
+        Create Effect(All Players(All Teams), Ring, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 6, Visible To and Color);
         Set Global Variable(Ring_FX, Last Created Entity);
-        Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 7.5, Visible To and Color);
+        Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6.1, Visible To and Color);
         Set Global Variable(Lightshaft_FX, Last Created Entity);
         Wait(0.1, Ignore Condition);
     }
