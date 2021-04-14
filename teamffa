@@ -435,25 +435,6 @@ rule ("Teleport teams to the right coordinates") {
     }
 }
 
-rule ("Capture Point Progress") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Players_On_Point >= 1;
-    }
-    actions {
-        Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
-        Wait(0.016, Ignore Condition);
-        Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
-        Stop Chasing Global Variable(Capture_Progress);
-        Wait(1, Ignore Condition);
-        Set Global Variable(Capture_Progress, 0);
-        Wait(0.1, Ignore Condition);
-    }
-}
-
 rule ("Display capture progress for those on point") {
     event {
         Ongoing - Each Player;
@@ -495,28 +476,6 @@ rule ("Display capture progress for those away from point") {
     }
 }
 
-rule ("Number of team members on point") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-    }
-    actions {
-        If(Compare(Global.Only_One_Team, ==, 1));
-            Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
-            If(Compare(Count Of(Global.Players_On_Point), ==, 1));
-                Set Global Variable(Team_Members_On_Point, 1);
-            Else If(Compare(Count Of(Global.Players_On_Point), ==, 2));
-                Set Global Variable(Team_Members_On_Point, 2);
-            Else If(Compare(Count Of(Global.Players_On_Point), ==, 3));
-                Set Global Variable(Team_Members_On_Point, 3);
-            End;
-        End;
-        Wait(0.1, Ignore Condition);
-    }
-}
-
 rule ("Only one team is capturing the point") {
     event {
         Ongoing - Each Player;
@@ -538,6 +497,51 @@ rule ("Only one team is capturing the point") {
     }
 }
 
+rule ("Number of team members on point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        If(Compare(Global.Only_One_Team, ==, 1));
+            Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
+            If(Compare(Count Of(Global.Players_On_Point), ==, 1));
+                Set Global Variable(Team_Members_On_Point, 1);
+            Else If(Compare(Count Of(Global.Players_On_Point), ==, 2));
+                Set Global Variable(Team_Members_On_Point, 2);
+            Else If(Compare(Count Of(Global.Players_On_Point), ==, 3));
+                Set Global Variable(Team_Members_On_Point, 3);
+            End;
+        Else If(And(Compare(Global.Only_One_Team, ==, 0), Compare(Count Of(Global.Players_On_Point), >, 1)));
+            Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
+        Else;
+            Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+        End;
+        Wait(0.1, Ignore Condition);
+    }
+}
+
+rule ("Capture Point Progress") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Players_On_Point > 0;
+    }
+    actions {
+        Chase Global Variable At Rate(Capture_Progress, 100, 15, Destination and Rate);
+        Wait(0.016, Ignore Condition);
+        Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
+        Stop Chasing Global Variable(Capture_Progress);
+        Wait(1, Ignore Condition);
+        Set Global Variable(Capture_Progress, 0);
+        Wait(0.1, Ignore Condition);
+    }
+}
+
 rule ("Capture Color") {
     event {
         Ongoing - Global;
@@ -546,7 +550,7 @@ rule ("Capture Color") {
         Global.In_Team_Mode != False;
     }
     actions {
-        If(Global.Only_One_Team);
+        If(Compare(Global.Only_One_Team, ==, 1));
             "green"
             If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 1));
                 Set Global Variable(Capture_Color, Custom Color(110, 200, 110, 255));
@@ -560,7 +564,7 @@ rule ("Capture Color") {
             Else If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 4));
                 Set Global Variable(Capture_Color, Custom Color(148, 0, 67, 255));
             End;
-        Else If(Not(Global.Only_One_Team));
+        Else If(Not(Compare(Global.Only_One_Team, ==, 0)));
             Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         End;
         Wait(0.1, Ignore Condition);
