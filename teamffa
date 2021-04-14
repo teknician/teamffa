@@ -523,33 +523,21 @@ rule ("Only one team is capturing the point") {
         Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
         If(Compare(Count Of(Global.Players_On_Point), ==, 1));
             Set Global Variable(Only_One_Team, 1);
+            Set Global Variable(Team_Members_On_Point, 0);
         Else If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
             Set Global Variable(Only_One_Team, 0);
         Else;
             Set Global Variable(Only_One_Team, 1);
         End;
         Wait(0.5, Ignore Condition);
-    }
-}
-
-rule ("Number of team members on point") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-        Count Of(Global.Players_On_Point) > 0;
-    }
-    actions {
         If(Compare(Global.Only_One_Team, ==, 1));
             Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
             If(Compare(Count Of(Global.Players_On_Point), ==, 1));
-                Set Global Variable(Team_Members_On_Point, 1);
+                Set Global Variable(Team_Members_On_Point, 0);
             Else If(Compare(Count Of(Global.Players_On_Point), ==, 2));
-                Set Global Variable(Team_Members_On_Point, 2);
+                Set Global Variable(Team_Members_On_Point, 15);
             Else If(Compare(Count Of(Global.Players_On_Point), ==, 3));
-                Set Global Variable(Team_Members_On_Point, 3);
+                Set Global Variable(Team_Members_On_Point, 30);
             End;
         Else If(And(Compare(Global.Only_One_Team, ==, 0), Compare(Count Of(Global.Players_On_Point), >, 1)));
             Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
@@ -568,7 +556,7 @@ rule ("Capture Point Progress") {
         Count Of(Global.Players_On_Point) > 0;
     }
     actions {
-        Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
+        Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Add(15, Multiply(Multiply(Global.Team_Members_On_Point, Global.Is_Point_Contested), Global.Only_One_Team)), Global.Capture_Reverse), Destination and Rate);
         Wait(0.016, Ignore Condition);
         Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
         Stop Chasing Global Variable(Capture_Progress);
