@@ -455,7 +455,9 @@ rule ("Display capture progress for those on point") {
         Else;
             Set Player Variable(Event Player, Player_Progress_Visibility, Null);
         End;
-        If(Not(Entity Exists((Event Player).Progress_Bar)));
+        If(Entity Exists((Event Player).Progress_Bar));
+            Abort;
+        Else;
             Create Progress Bar HUD Text(All Players(All Teams), Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
             Set Player Variable(Event Player, Progress_Bar, Last Text ID);
         End;
@@ -477,7 +479,9 @@ rule ("Display capture progress for those away from point") {
         Else;
             Set Global Variable(Progress_Visibility, Null);
         End;
-        If(Not(Entity Exists(Global.Global_Progress_Bar)));
+        If(Entity Exists(Global.Global_Progress_Bar));
+            Abort;
+        Else;
             Create Progress Bar In-World Text(All Players(All Teams), Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
             Set Global Variable(Global_Progress_Bar, Last Text ID);
         End;
@@ -628,10 +632,14 @@ rule ("Create Ring and Light Shaft for Point") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Create Effect(All Players(All Teams), Sparkles, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 6, Visible To and Color);
-        Set Global Variable(Sparkle_FX, Last Created Entity);
-        Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6, Visible To and Color);
-        Set Global Variable(Lightshaft_FX, Last Created Entity);
+        If(Not(Entity Exists(Global.Sparkle_FX)));
+            Create Effect(All Players(All Teams), Sparkles, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 6, Visible To and Color);
+            Set Global Variable(Sparkle_FX, Last Created Entity);
+        End;
+        If(Not(Entity Exists(Global.Lightshaft_FX)));
+            Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6, Visible To and Color);
+            Set Global Variable(Lightshaft_FX, Last Created Entity);
+        End;
         Wait(0.1, Ignore Condition);
     }
 }
