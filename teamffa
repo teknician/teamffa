@@ -374,15 +374,20 @@ rule ("Teleport teams to the right coordinates") {
         Or(Or(Or(Compare(Count Of(Global.Team_1), >, 0), Compare(Count Of(Global.Team_2), >, 0)), Compare(Count Of(Global.Team_3), >, 0)), Compare(Count Of(Global.Team_4), >, 0)) == True;
     }
     actions {
-        Wait(2, Ignore Condition);
+        Wait(1.5, Ignore Condition);
         For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
             Set Status(Value In Array(Global.Players_In_Match, Global.Player_Index), Null, Frozen, 3);
             Wait(0.016, Ignore Condition);
         End;
+        Small Message(All Players(All Teams), Custom String("3...", Null, Null, Null));
+        Wait(1, Ignore Condition);
+        Small Message(All Players(All Teams), Custom String("2...", Null, Null, Null));
+        Wait(1, Ignore Condition);
+        Small Message(All Players(All Teams), Custom String("1...", Null, Null, Null));
         Teleport(First Of(Global.Team_1), First Of(Global.Team_1_Vectors));
         Teleport(Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1_Vectors, 1));
         Teleport(Value In Array(Global.Team_1, 2), Value In Array(Global.Team_1_Vectors, 2));
-        Wait(0.5, Ignore Condition);
+        Wait(0.1, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_1_Vectors), 5);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_1_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_1_Vectors, 1), 1);
@@ -392,7 +397,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_2), First Of(Global.Team_2_Vectors));
         Teleport(Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2_Vectors, 1));
         Teleport(Value In Array(Global.Team_2, 2), Value In Array(Global.Team_2_Vectors, 2));
-        Wait(0.5, Ignore Condition);
+        Wait(0.1, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_2_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_2_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_2_Vectors, 1), 1);
@@ -402,7 +407,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_3), First Of(Global.Team_3_Vectors));
         Teleport(Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3_Vectors, 1));
         Teleport(Value In Array(Global.Team_3, 2), Value In Array(Global.Team_3_Vectors, 2));
-        Wait(0.5, Ignore Condition);
+        Wait(0.1, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_3_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_3_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_3_Vectors, 1), 1);
@@ -412,7 +417,7 @@ rule ("Teleport teams to the right coordinates") {
         Teleport(First Of(Global.Team_4), First Of(Global.Team_4_Vectors));
         Teleport(Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4_Vectors, 1));
         Teleport(Value In Array(Global.Team_4, 2), Value In Array(Global.Team_4_Vectors, 2));
-        Wait(0.5, Ignore Condition);
+        Wait(0.1, Ignore Condition);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), First Of(Global.Team_4_Vectors), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), First Of(Global.Team_4_Vectors), 100);
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 1), 1);
@@ -420,13 +425,8 @@ rule ("Teleport teams to the right coordinates") {
         Play Effect(All Players(All Teams), Ring Explosion, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 1);
         Play Effect(All Players(All Teams), Ring Explosion Sound, Color(Team 1), Value In Array(Global.Team_4_Vectors, 2), 100);
         Big Message(All Players(All Teams), Custom String("Teams have been teleported.", Null, Null, Null));
+        Wait(0.1, Ignore Condition);
         Wait(0.5, Ignore Condition);
-        Small Message(All Players(All Teams), Custom String("3...", Null, Null, Null));
-        Wait(1, Ignore Condition);
-        Small Message(All Players(All Teams), Custom String("2...", Null, Null, Null));
-        Wait(1, Ignore Condition);
-        Small Message(All Players(All Teams), Custom String("1...", Null, Null, Null));
-        Wait(1, Ignore Condition);
         Small Message(All Players(All Teams), Custom String("GO!", Null, Null, Null));
         For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
             Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Buff Impact Sound, Color(Team 1), Position Of(Value In Array(Global.Players_In_Match, Global.Player_Index)), 200);
@@ -450,6 +450,50 @@ rule ("Capture Point Progress") {
         Stop Chasing Global Variable(Capture_Progress);
         Wait(1, Ignore Condition);
         Set Global Variable(Capture_Progress, 0);
+        Wait(0.1, Ignore Condition);
+    }
+}
+
+rule ("Display capture progress for those on point") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Array Contains(Global.Players_On_Point, Event Player) == True;
+    }
+    actions {
+        If(Not(Entity Exists((Event Player).Progress_Bar)));
+            Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
+            Set Player Variable(Event Player, Progress_Bar, Last Text ID);
+        End;
+        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+        Else;
+            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
+        End;
+        Wait(0.1, Ignore Condition);
+    }
+}
+
+rule ("Display capture progress for those away from point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+    }
+    actions {
+        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        Else;
+            Set Global Variable(Progress_Visibility, Null);
+        End;
+        If(Not(Entity Exists(Global.Global_Progress_Bar)));
+            Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
+            Set Global Variable(Global_Progress_Bar, Last Text ID);
+        End;
         Wait(0.1, Ignore Condition);
     }
 }
@@ -588,50 +632,6 @@ rule ("Reverse capture progress when no player is on the point") {
             Set Global Variable(Capture_Reverse, 0);
         End;
         Wait(0.5, Ignore Condition);
-    }
-}
-
-rule ("Display capture progress for those on point") {
-    event {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-    conditions {
-        Array Contains(Global.Players_On_Point, Event Player) == True;
-    }
-    actions {
-        If(Not(Entity Exists((Event Player).Progress_Bar)));
-            Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
-            Set Player Variable(Event Player, Progress_Bar, Last Text ID);
-        End;
-        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
-            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
-        Else;
-            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-        End;
-        Wait(0.1, Ignore Condition);
-    }
-}
-
-rule ("Display capture progress for those away from point") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-    }
-    actions {
-        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
-            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
-        Else;
-            Set Global Variable(Progress_Visibility, Null);
-        End;
-        If(Not(Entity Exists(Global.Global_Progress_Bar)));
-            Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
-            Set Global Variable(Global_Progress_Bar, Last Text ID);
-        End;
-        Wait(0.1, Ignore Condition);
     }
 }
 
