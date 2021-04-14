@@ -61,20 +61,21 @@ variables {
         23: Selector
         24: In_Team_Mode
         25: Random_Player
-        26: Capture_Progress
-        27: Point_Belongs_To
-        28: Is_Point_Contested
-        29: Players_On_Point
-        30: Team_Members_On_Point
-        31: Only_One_Team
-        32: Capture_Reverse
-        33: Capture_Color
-        34: Sparkle_FX
-        35: Lightshaft_FX
-        36: Shaft_Color
-        37: Point_Text
-        38: Global_Progress_Bar
-        39: Progress_Visibility
+        26: Teleports_Completed
+        27: Capture_Progress
+        28: Point_Belongs_To
+        29: Is_Point_Contested
+        30: Players_On_Point
+        31: Team_Members_On_Point
+        32: Only_One_Team
+        33: Capture_Reverse
+        34: Capture_Color
+        35: Sparkle_FX
+        36: Lightshaft_FX
+        37: Shaft_Color
+        38: Point_Text
+        39: Global_Progress_Bar
+        40: Progress_Visibility
     player:
         0: Target
         1: Team_Membership
@@ -434,6 +435,7 @@ rule ("Teleport teams to the right coordinates") {
             Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Buff Impact Sound, Color(Team 1), Position Of(Value In Array(Global.Players_In_Match, Global.Player_Index)), 200);
             Wait(0.016, Ignore Condition);
         End;
+        Set Global Variable(Teleports_Completed, True);
     }
 }
 
@@ -445,7 +447,7 @@ rule ("Display capture progress for those on point") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Teleports_Completed != False;
     }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
@@ -467,7 +469,7 @@ rule ("Display capture progress for those away from point") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Teleports_Completed != False;
     }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
@@ -491,7 +493,7 @@ rule ("Only one team is capturing the point") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Teleports_Completed != False;
     }
     actions {
         "Only one team is capturing the point"
@@ -511,7 +513,7 @@ rule ("Number of team members on point") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Teleports_Completed != False;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
@@ -539,6 +541,7 @@ rule ("Capture Point Progress") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
     }
     actions {
         Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
@@ -551,7 +554,7 @@ rule ("Capture Color") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Teleports_Completed != False;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
@@ -581,6 +584,7 @@ rule ("Light Shaft Flash") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
     }
     actions {
         While(Global.Is_Point_Contested);
@@ -600,6 +604,7 @@ rule ("Reverse capture progress when no player is on the point") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
     }
     actions {
         "Reverse capture progress when no players contesting"
