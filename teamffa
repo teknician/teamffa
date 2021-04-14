@@ -181,8 +181,8 @@ rule ("Initialize variables (and create dummies)") {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
         Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         Set Global Variable(Capture_Progress, 0);
-        Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 6, All Teams, Off));
         Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
         Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(-10, 5.84, 6), Vector(-1, 6, 18)));
@@ -439,6 +439,21 @@ rule ("Teleport teams to the right coordinates") {
     }
 }
 
+rule ("Initialize Players on Point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+    }
+    actions {
+        Set Global Variable(Players_On_Point, Players Within Radius(Global.Capture_Point_Vector, 6, All Teams, Off));
+        Wait(0.5, Ignore Condition);
+        Loop If Condition Is True;
+    }
+}
+
 rule ("Display capture progress for those on point") {
     event {
         Ongoing - Each Player;
@@ -448,6 +463,7 @@ rule ("Display capture progress for those on point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
@@ -455,10 +471,8 @@ rule ("Display capture progress for those on point") {
         Else;
             Set Player Variable(Event Player, Player_Progress_Visibility, Null);
         End;
-        If(Entity Exists((Event Player).Progress_Bar));
-            Abort;
-        Else;
-            Create Progress Bar HUD Text(All Players(All Teams), Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
+        If(Not(Entity Exists((Event Player).Progress_Bar)));
+            Create Progress Bar HUD Text(Event Player, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
             Set Player Variable(Event Player, Progress_Bar, Last Text ID);
         End;
         Wait(0.1, Ignore Condition);
@@ -472,6 +486,7 @@ rule ("Display capture progress for those away from point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
@@ -479,9 +494,7 @@ rule ("Display capture progress for those away from point") {
         Else;
             Set Global Variable(Progress_Visibility, Null);
         End;
-        If(Entity Exists(Global.Global_Progress_Bar));
-            Abort;
-        Else;
+        If(Not(Entity Exists(Global.Global_Progress_Bar)));
             Create Progress Bar In-World Text(All Players(All Teams), Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
             Set Global Variable(Global_Progress_Bar, Last Text ID);
         End;
@@ -498,6 +511,7 @@ rule ("Only one team is capturing the point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         "Only one team is capturing the point"
@@ -518,6 +532,7 @@ rule ("Number of team members on point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
@@ -546,9 +561,16 @@ rule ("Capture Point Progress") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         Chase Global Variable At Rate(Capture_Progress, 100, Subtract(Multiply(Multiply(Multiply(15, Global.Team_Members_On_Point), Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
+        Wait(0.016, Ignore Condition);
+        Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
+        Stop Chasing Global Variable(Capture_Progress);
+        Wait(1, Ignore Condition);
+        Set Global Variable(Capture_Progress, 0);
+        Wait(0.1, Ignore Condition);
     }
 }
 
@@ -559,6 +581,7 @@ rule ("Capture Color") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
