@@ -441,6 +441,10 @@ rule ("Display capture progress for those on point") {
         All;
         All;
     }
+    conditions {
+        Global.In_Team_Mode != False;
+        Count Of(Global.Players_On_Point) > 0;
+    }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
             Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
@@ -461,6 +465,7 @@ rule ("Display capture progress for those away from point") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
@@ -484,6 +489,7 @@ rule ("Only one team is capturing the point") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         "Only one team is capturing the point"
@@ -503,6 +509,7 @@ rule ("Number of team members on point") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
@@ -529,7 +536,7 @@ rule ("Capture Point Progress") {
     }
     conditions {
         Global.In_Team_Mode != False;
-        Global.Players_On_Point > 0;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         Chase Global Variable At Rate(Capture_Progress, 100, 15, Destination and Rate);
@@ -548,6 +555,7 @@ rule ("Capture Color") {
     }
     conditions {
         Global.In_Team_Mode != False;
+        Count Of(Global.Players_On_Point) > 0;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
@@ -619,7 +627,7 @@ rule ("Create Ring and Light Shaft for Point") {
         Global.In_Team_Mode != False;
     }
     actions {
-        Create Effect(All Players(All Teams), Ring, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 6, Visible To and Color);
+        Create Effect(All Players(All Teams), Ring, Global.Capture_Color, Add(Global.Capture_Point_Vector, Vector(0, 0.5, 0)), 8, Visible To and Color);
         Set Global Variable(Ring_FX, Last Created Entity);
         Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6.1, Visible To and Color);
         Set Global Variable(Lightshaft_FX, Last Created Entity);
