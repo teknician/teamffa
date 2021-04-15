@@ -183,7 +183,7 @@ rule ("Initialize variables (and create dummies)") {
     }
     actions {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
-        Set Global Variable(Capture_Reverse, Color(White));
+        Set Global Variable(Capture_Color, Color(White));
         Set Global Variable(Capture_Progress, 0);
         Set Global Variable(Capture_Reverse_Multiplier, 1);
         Set Global Variable(Capture_Reverse, 0);
@@ -212,6 +212,17 @@ rule ("Initialize variables (and create dummies)") {
         Create Dummy Bot(Hero(Genji), All Teams, -1, Vector(0, 50, 0), Forward);
         Create Dummy Bot(Hero(Zarya), All Teams, -1, Vector(0, 50, 0), Forward);
         Create Dummy Bot(Hero(Moira), All Teams, -1, Vector(0, 50, 0), Forward);
+    }
+}
+
+rule ("Initialize player variables") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    actions {
+        Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
     }
 }
 
@@ -519,30 +530,6 @@ rule ("Capture Point Progress") {
     }
 }
 
-rule ("Reverse capture progress when no player is on the point") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-        Global.Capture_Progress > 0;
-    }
-    actions {
-        "Reverse capture progress when no players contesting"
-        Wait Until(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Compare(Global.Is_Point_Contested, ==, 0)), 9999);
-        Wait(2, Ignore Condition);
-        Set Global Variable(Capture_Reverse_Multiplier, 0);
-        Set Global Variable(Capture_Reverse, 20);
-        Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
-        Wait Until(Global.Is_Point_Contested, 9999);
-        Set Global Variable(Capture_Reverse_Multiplier, 1);
-        Set Global Variable(Capture_Reverse, 0);
-        Wait(0.1, Ignore Condition);
-        Loop If Condition Is True;
-    }
-}
-
 rule ("Capture point reset") {
     event {
         Ongoing - Global;
@@ -556,10 +543,34 @@ rule ("Capture point reset") {
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Set Global Variable(Is_Point_Contested, 0);
         Stop Chasing Global Variable(Capture_Progress);
-        Wait(0.5, Ignore Condition);
+        Wait(1, Ignore Condition);
         Wait Until(Compare(Global.Is_Point_Contested, ==, 1), 9999);
         Set Global Variable(Capture_Progress, 0);
         Wait(0.1, Ignore Condition);
+    }
+}
+
+rule ("Reverse capture progress when no player is on the point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+        Array Contains(Array(100, 0), Global.Capture_Progress) == False;
+    }
+    actions {
+        "Reverse capture progress when no players contesting"
+        Wait Until(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Compare(Global.Is_Point_Contested, ==, 0)), 9999);
+        Wait(2, Ignore Condition);
+        Set Global Variable(Capture_Reverse_Multiplier, 0);
+        Set Global Variable(Capture_Reverse, 20);
+        Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+        Wait Until(Or(Global.Is_Point_Contested, Compare(Global.Capture_Progress, ==, 0)), 9999);
+        Set Global Variable(Capture_Reverse_Multiplier, 1);
+        Set Global Variable(Capture_Reverse, 0);
+        Wait(0.1, Ignore Condition);
+        Loop If Condition Is True;
     }
 }
 
@@ -605,13 +616,21 @@ rule ("Determine whether progress is visible") {
         Global.Teleports_Completed != False;
     }
     actions {
-        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
-            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+        If(Array Contains(Global.Players_On_Point, Event Player));
             Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+            If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+                Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+            Else;
+                Set Player Variable(Event Player, Player_Progress_Visibility, Null);
+            End;
         Else;
             Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-            Set Global Variable(Progress_Visibility, Null);
-            Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+            If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+                Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+            Else;
+                Set Global Variable(Progress_Visibility, Null);
+                Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+            End;
         End;
         Wait(1, Ignore Condition);
         Loop If Condition Is True;
