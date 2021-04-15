@@ -110,16 +110,19 @@ rule ("Host Diagnostics") {
         Create HUD Text(All Players(All Teams), Custom String("Z: {0}", Z Component Of(Position Of(Event Player)), Null, Null), Null, Null, Left, 2, Color(White), Null, Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Players In Match: {0}, {1}, {2}", First Of(Global.Players_In_Match), Value In Array(Global.Players_In_Match, 1), Custom String("{0}, {1}, {2}", Value In Array(Global.Players_In_Match, 2), Value In Array(Global.Players_In_Match, 3), Custom String("{0}, {1}, {2}", Value In Array(Global.Players_In_Match, 4), Value In Array(Global.Players_In_Match, 5), Custom String("{0}, {1}, {2}", Value In Array(Global.Players_In_Match, 6), Value In Array(Global.Players_In_Match, 7), Custom String("{0}, {1}, {2}", Value In Array(Global.Players_In_Match, 8), Value In Array(Global.Players_In_Match, 9), Custom String("{0}, {1}", Value In Array(Global.Players_In_Match, 10), Value In Array(Global.Players_In_Match, 11), Null)))))), Null, Left, 3, Null, Color(Lime Green), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Array of Teams: {0} {1} {2}", First Of(Global.Array_Of_Teams), Value In Array(Global.Array_Of_Teams, 1), Custom String("{0} {1}", Value In Array(Global.Array_Of_Teams, 2), Value In Array(Global.Array_Of_Teams, 3), Null)), Null, Left, 4, Null, Color(Lime Green), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Team_1: {0}, {1}, {2}", First Of(Global.Team_1), Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), Null, Left, 5, Null, Color(Rose), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Team_2: {0}, {1}, {2}", First Of(Global.Team_2), Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), Null, Left, 6, Null, Color(Rose), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Team_3: {0}, {1}, {2}", First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), Null, Left, 7, Null, Color(Rose), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("Team_4: {0}, {1}, {2}", First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), Null, Left, 8, Null, Color(Rose), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Team_1 (g): {0}, {1}, {2}", First Of(Global.Team_1), Value In Array(Global.Team_1, 1), Value In Array(Global.Team_1, 2)), Null, Left, 5, Null, Color(Rose), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Team_2 (b): {0}, {1}, {2}", First Of(Global.Team_2), Value In Array(Global.Team_2, 1), Value In Array(Global.Team_2, 2)), Null, Left, 6, Null, Color(Rose), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Team_3 (y): {0}, {1}, {2}", First Of(Global.Team_3), Value In Array(Global.Team_3, 1), Value In Array(Global.Team_3, 2)), Null, Left, 7, Null, Color(Rose), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("Team_4 (r): {0}, {1}, {2}", First Of(Global.Team_4), Value In Array(Global.Team_4, 1), Value In Array(Global.Team_4, 2)), Null, Left, 8, Null, Color(Rose), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Team_1_Count: {0}\nTeam_2_Count: {1}\nTeam_3_Count: {2}", Global.Team_1_Count, Global.Team_2_Count, Custom String("{0}\nTeam_4_Count: {1}", Global.Team_3_Count, Global.Team_4_Count, Null)), Null, Left, 9, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("Smallest Team: {0}\nArray of Team Counts: {1}, {2}", First Of(Sorted Array(Global.Array_Of_Team_Counts, Current Array Element)), First Of(Global.Array_Of_Team_Counts), Custom String("{0}, {1}, {2}", Value In Array(Global.Array_Of_Team_Counts, 1), Value In Array(Global.Array_Of_Team_Counts, 2), Custom String("{0}\nIn Team Mode: {1}", Value In Array(Global.Array_Of_Team_Counts, 3), Global.In_Team_Mode, Null))), Null, Left, 10, Null, Color(Sky Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("1Vectors: {0}, {1}, {2}", First Of(Global.Team_1_Vectors), Value In Array(Global.Team_1_Vectors, 1), Value In Array(Global.Team_1_Vectors, 2)), Null, Right, 0, Null, Color(Yellow), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("2Vectors: {0}, {1}, {2}", First Of(Global.Team_2_Vectors), Value In Array(Global.Team_2_Vectors, 1), Value In Array(Global.Team_2_Vectors, 2)), Null, Right, 1, Null, Color(Red), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("3Vectors: {0}, {1}, {2}", First Of(Global.Team_3_Vectors), Value In Array(Global.Team_3_Vectors, 1), Value In Array(Global.Team_3_Vectors, 2)), Null, Right, 2, Null, Color(Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("4Vectors: {0}, {1}, {2}", First Of(Global.Team_4_Vectors), Value In Array(Global.Team_4_Vectors, 1), Value In Array(Global.Team_4_Vectors, 2)), Null, Right, 3, Null, Color(Orange), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("CaptureProgress: {0}\nCaptureDestination: {1}\nPointBelongsTo: {2}", Global.Capture_Progress, Global.Capture_Destination, Custom String("{0}\nIsPointContested: {1}\nCapture_Reverse: {2}", Global.Point_Belongs_To, Global.Is_Point_Contested, Custom String("{0}\nCapture_Color: {1}", Global.Capture_Reverse, Global.Capture_Color, Null))), Null, Right, 4, Null, Color(White), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("PlayersOnPoint: {0}, {1}, {2}", First Of(Global.Players_On_Point), Value In Array(Global.Players_On_Point, 1), Custom String("{0}, {1}, {2}", Value In Array(Global.Players_On_Point, 2), Value In Array(Global.Players_On_Point, 3), Custom String("{0}, {1}", Value In Array(Global.Players_On_Point, 4), Value In Array(Global.Players_On_Point, 5), Null))), Null, Right, 5, Null, Color(Green), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("TeamMembersOnPoint: {0}\nOnlyOneTeam: {1}\nPointText: {2}", Global.Team_Members_On_Point, Global.Only_One_Team, Custom String("{0}\nProgressVis: {1}", Global.Point_Text, Global.Progress_Visibility, Null)), Null, Right, 6, Null, Color(Blue), Null, Visible To and String, Default Visibility);
     }
 }
 
@@ -180,7 +183,6 @@ rule ("Initialize variables (and create dummies)") {
     }
     actions {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
-        Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         Set Global Variable(Capture_Progress, 0);
         Set Global Variable(Capture_Destination, 100);
         Set Global Variable(Capture_Reverse, 0);
@@ -481,7 +483,7 @@ rule ("Only one team is capturing the point") {
         Else;
             Set Global Variable(Only_One_Team, 1);
         End;
-        Wait(0.5, Ignore Condition);
+        Wait(0.1, Ignore Condition);
         If(Compare(Global.Only_One_Team, ==, 1));
             Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
             If(Compare(Count Of(Global.Players_On_Point), ==, 1));
@@ -511,7 +513,7 @@ rule ("Capture Point Progress") {
         Chase Global Variable At Rate(Capture_Progress, Global.Capture_Destination, Add(Add(12, Multiply(Multiply(Global.Team_Members_On_Point, Global.Is_Point_Contested), Global.Only_One_Team)), Global.Capture_Reverse), Destination and Rate);
         Wait(0.016, Ignore Condition);
         Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
-        Set Global Variable(Is_Point_Contested, False);
+        Set Global Variable(Is_Point_Contested, 0);
         Stop Chasing Global Variable(Capture_Progress);
         Wait(0.5, Ignore Condition);
         Wait Until(Compare(Global.Is_Point_Contested, ==, 1), 9999);
@@ -534,13 +536,14 @@ rule ("Reverse capture progress when no player is on the point") {
         If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
             Wait(2.5, Ignore Condition);
             Set Global Variable(Capture_Destination, 0);
-            Set Global Variable(Capture_Reverse, 20);
+            Set Global Variable(Capture_Reverse, 30);
+            Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         End;
         If(Global.Is_Point_Contested);
             Set Global Variable(Capture_Destination, 100);
             Set Global Variable(Capture_Reverse, 0);
         End;
-        Wait(0.5, Ignore Condition);
+        Wait(0.1, Ignore Condition);
     }
 }
 
@@ -551,7 +554,7 @@ rule ("Capture Color") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Capture_Progress > 0;
     }
     actions {
         If(Compare(Global.Only_One_Team, ==, 1));
@@ -587,9 +590,6 @@ rule ("Display capture progress for those on point") {
         Count Of(Global.Players_On_Point) > 0;
     }
     actions {
-        If(Compare(Global.Capture_Progress, ==, 100));
-            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-        End;
         If(Compare((Event Player).Progress_Bar, !=, Null));
             Abort;
         Else;
@@ -597,6 +597,11 @@ rule ("Display capture progress for those on point") {
             Set Player Variable(Event Player, Progress_Bar, Last Text ID);
         End;
         Wait(0.1, Ignore Condition);
+        If(Compare(Global.Capture_Progress, ==, 100));
+            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
+            Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+        Else If(Compare(Global.Capture_Progress, !=, 0));
+            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
     }
 }
 
@@ -610,11 +615,6 @@ rule ("Display capture progress for those away from point") {
         Count Of(Global.Players_On_Point) > 0;
     }
     actions {
-        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
-            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
-        Else;
-            Set Global Variable(Progress_Visibility, Null);
-        End;
         If(Compare(Global.Global_Progress_Bar, !=, Null));
             Abort;
         Else If(Compare(Global.Global_Progress_Bar, ==, Null));
@@ -622,6 +622,10 @@ rule ("Display capture progress for those away from point") {
             Set Global Variable(Global_Progress_Bar, Last Text ID);
         End;
         Wait(0.1, Ignore Condition);
+        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        Else;
+            Set Global Variable(Progress_Visibility, Null);
     }
 }
 
