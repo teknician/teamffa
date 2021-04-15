@@ -58,29 +58,30 @@ variables {
         20: Index_1
         21: Index_2
         22: Index_3
-        23: Tertiary_Player_Index
-        24: Array_Of_Teams
-        25: Array_Of_Team_Counts
-        26: Selector
-        27: In_Team_Mode
-        28: Random_Player
-        29: Teleports_Completed
-        30: Capture_Progress
-        31: Capture_Reverse_Multiplier
-        32: Point_Belongs_To
-        33: Is_Point_Contested
-        34: Players_On_Point
-        35: Team_Members_Scalar
-        36: Only_One_Team
-        37: Capture_Reverse
-        38: Capture_Color
-        39: Sparkle_FX
-        40: Lightshaft_FX
-        41: Shaft_Color
-        42: Point_Text
-        43: Global_Progress_Bar
-        44: Progress_Visibility
-        45: Capture_Progress_Sound
+        23: Index_4
+        24: Tertiary_Player_Index
+        25: Array_Of_Teams
+        26: Array_Of_Team_Counts
+        27: Selector
+        28: In_Team_Mode
+        29: Random_Player
+        30: Teleports_Completed
+        31: Capture_Progress
+        32: Capture_Reverse_Multiplier
+        33: Point_Belongs_To
+        34: Is_Point_Contested
+        35: Players_On_Point
+        36: Team_Members_Scalar
+        37: Only_One_Team
+        38: Capture_Reverse
+        39: Capture_Color
+        40: Sparkle_FX
+        41: Lightshaft_FX
+        42: Shaft_Color
+        43: Point_Text
+        44: Global_Progress_Bar
+        45: Progress_Visibility
+        46: Capture_Progress_Sound
     player:
         0: Target
         1: Team_Membership
@@ -532,7 +533,7 @@ rule ("Capture Point Progress") {
         If(Entity Exists(Global.Capture_Progress_Sound));
             Abort;
         Else;
-            Create Effect(All Players(All Teams), Beacon Sound, Color(White), Global.Capture_Point_Vector, Multiply(Multiply(Global.Capture_Progress, 2), Global.Is_Point_Contested), Visible To Position and Radius);
+            Create Effect(All Players(All Teams), Beacon Sound, Color(White), Global.Capture_Point_Vector, Multiply(Multiply(Global.Capture_Progress, 3), Global.Is_Point_Contested), Visible To Position and Radius);
             Set Global Variable(Capture_Progress_Sound, Last Created Entity);
         End;
         Wait(0.016, Ignore Condition);
@@ -546,7 +547,7 @@ rule ("Reverse capture progress when no player is on the point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Array Contains(Array(100, 0), Global.Capture_Progress) == False;
+        Global.Capture_Progress != 100;
     }
     actions {
         "Reverse capture progress when no players contesting\n waitUntil(Capture_Progress > 0 and Capture_Progress != 100 and Is_Point_Contested == 0, 9999)"
@@ -757,31 +758,31 @@ rule ("Damage dealt by teammates is taken as healing") {
     }
 }
 
-rule ("Respawn teammates near each other after death") {
+rule ("Damage each teammate on a loop to show their health bars") {
     event {
-        Player Died;
+        Ongoing - Each Player;
         All;
         All;
     }
     conditions {
         Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
     }
     actions {
-        Wait(0.5, Ignore Condition);
-        Wait Until(Is Alive(Event Player), 10);
-        For Global Variable(Index_2, 0, 3, 1);
-            Small Message(All Players(All Teams), Custom String("Respawn for loop 1 works", Null, Null, Null));
-            For Player Variable(Event Player, Secondary_Player_Index, 0, Count Of(Value In Array(Global.Array_Of_Teams, Global.Index_2)), 1);
-                Small Message(All Players(All Teams), Custom String("Respawn for loop 2 works", Null, Null, Null));
-                If(Is Alive(Value In Array(Value In Array(Global.Array_Of_Teams, Global.Index_2), (Event Player).Secondary_Player_Index)));
-                    Small Message(All Players(All Teams), Custom String("Respawn teleport works", Null, Null, Null));
-                    Teleport(Event Player, Nearest Walkable Position(Add(Position Of(Value In Array(Value In Array(Global.Array_Of_Teams, Global.Index_2), (Event Player).Secondary_Player_Index)), Vector(Random Integer(-8, 8), Random Integer(0, 4), Random Integer(-8, 8)))));
-                    Abort;
+        For Global Variable(Index_2, 0, Number Of Players(All Teams), 1);
+            For Global Variable(Index_3, 0, 3, 1);
+                If(Compare((Event Player).Team_Num, ==, Add(Global.Index_3, 1)));
+                    For Global Variable(Index_4, 0, Count Of(Value In Array(Global.Array_Of_Teams, Add(Global.Index_3, 1))), 1);
+                        Damage(Value In Array(Value In Array(Global.Array_Of_Teams, Add(Global.Index_3, 1)), Global.Index_4), Event Player, 0.01);
+                        Wait(0.016, Ignore Condition);
+                    End;
+                    Wait(0.016, Ignore Condition);
                 End;
                 Wait(0.016, Ignore Condition);
             End;
             Wait(0.016, Ignore Condition);
         End;
+        Wait(1, Ignore Condition);
     }
 }
 
