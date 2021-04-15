@@ -523,10 +523,35 @@ rule ("Capture Point Progress") {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
         Global.Is_Point_Contested == 1;
+        Global.Capture_Progress != 100;
     }
     actions {
         Chase Global Variable At Rate(Capture_Progress, Multiply(100, Global.Capture_Reverse_Multiplier), Add(Multiply(Multiply(Global.Team_Members_Scalar, Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
         Wait(0.016, Ignore Condition);
+    }
+}
+
+rule ("Reverse capture progress when no player is on the point") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+        Array Contains(Array(100, 0), Global.Capture_Progress) == False;
+    }
+    actions {
+        "Reverse capture progress when no players contesting"
+        Wait Until(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Compare(Global.Is_Point_Contested, ==, 0)), 9999);
+        Wait(2, Abort When False);
+        Set Global Variable(Capture_Reverse_Multiplier, 0);
+        Set Global Variable(Capture_Reverse, 20);
+        Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+        Wait Until(Or(Global.Is_Point_Contested, Compare(Global.Capture_Progress, ==, 0)), 9999);
+        Set Global Variable(Capture_Reverse_Multiplier, 1);
+        Set Global Variable(Capture_Reverse, 0);
+        Wait(0.016, Ignore Condition);
+        Loop If Condition Is True;
     }
 }
 
@@ -543,34 +568,10 @@ rule ("Capture point reset") {
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Set Global Variable(Is_Point_Contested, 0);
         Stop Chasing Global Variable(Capture_Progress);
+        Set Global Variable(Capture_Progress, 0);
         Wait(1, Ignore Condition);
         Wait Until(Compare(Global.Is_Point_Contested, ==, 1), 9999);
-        Set Global Variable(Capture_Progress, 0);
         Wait(0.1, Ignore Condition);
-    }
-}
-
-rule ("Reverse capture progress when no player is on the point") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-        Array Contains(Array(100, 0), Global.Capture_Progress) == False;
-    }
-    actions {
-        "Reverse capture progress when no players contesting"
-        Wait Until(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Compare(Global.Is_Point_Contested, ==, 0)), 9999);
-        Wait(2, Ignore Condition);
-        Set Global Variable(Capture_Reverse_Multiplier, 0);
-        Set Global Variable(Capture_Reverse, 20);
-        Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
-        Wait Until(Or(Global.Is_Point_Contested, Compare(Global.Capture_Progress, ==, 0)), 9999);
-        Set Global Variable(Capture_Reverse_Multiplier, 1);
-        Set Global Variable(Capture_Reverse, 0);
-        Wait(0.1, Ignore Condition);
-        Loop If Condition Is True;
     }
 }
 
