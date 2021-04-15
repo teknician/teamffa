@@ -496,7 +496,7 @@ rule ("Only one team is capturing the point") {
         Else;
             Set Global Variable(Only_One_Team, 1);
         End;
-        Wait(0.1, Ignore Condition);
+        Wait(0.016, Ignore Condition);
         If(Compare(Global.Only_One_Team, ==, 1));
             Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
             If(Compare(Count Of(Global.Players_On_Point), ==, 1));
