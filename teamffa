@@ -507,12 +507,25 @@ rule ("Capture Point Progress") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Is_Point_Contested == 1;
     }
     actions {
         Chase Global Variable At Rate(Capture_Progress, Global.Capture_Destination, Add(Add(12, Multiply(Multiply(Global.Team_Members_On_Point, Global.Is_Point_Contested), Global.Only_One_Team)), Global.Capture_Reverse), Destination and Rate);
         Wait(0.016, Ignore Condition);
-        Wait Until(Compare(Global.Capture_Progress, ==, 100), 99999);
+    }
+}
+
+rule ("Capture point reset") {
+    event {
+        Ongoing - Global;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+        Global.Capture_Progress == 100;
+    }
+    actions {
+        Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Set Global Variable(Is_Point_Contested, 0);
         Stop Chasing Global Variable(Capture_Progress);
         Wait(0.5, Ignore Condition);
@@ -533,10 +546,10 @@ rule ("Reverse capture progress when no player is on the point") {
     }
     actions {
         "Reverse capture progress when no players contesting"
-        If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
-            Wait(2.5, Ignore Condition);
+        If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Compare(Global.Is_Point_Contested, ==, 0)));
+            Wait(2, Ignore Condition);
             Set Global Variable(Capture_Destination, 0);
-            Set Global Variable(Capture_Reverse, 30);
+            Set Global Variable(Capture_Reverse, 20);
             Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         End;
         If(Global.Is_Point_Contested);
@@ -642,29 +655,9 @@ rule ("Create Ring and Light Shaft for Point") {
             Set Global Variable(Sparkle_FX, Last Created Entity);
         End;
         If(Not(Entity Exists(Global.Lightshaft_FX)));
-            Create Effect(All Players(All Teams), Light Shaft, Global.Shaft_Color, Global.Capture_Point_Vector, 6, Visible To and Color);
+            Create Effect(All Players(All Teams), Light Shaft, Global.Capture_Color, Global.Capture_Point_Vector, 6, Visible To and Color);
             Set Global Variable(Lightshaft_FX, Last Created Entity);
         End;
-        Wait(0.1, Ignore Condition);
-    }
-}
-
-rule ("Light Shaft Flash") {
-    event {
-        Ongoing - Global;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-    }
-    actions {
-        While(Global.Is_Point_Contested);
-            Set Global Variable(Shaft_Color, Global.Capture_Color);
-            Wait(0.5, Ignore Condition);
-            Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
-            Wait(0.5, Ignore Condition);
-        End;
-        Set Global Variable(Shaft_Color, Custom Color(255, 255, 255, 25));
         Wait(0.1, Ignore Condition);
     }
 }
