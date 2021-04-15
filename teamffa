@@ -63,11 +63,11 @@ variables {
         25: Random_Player
         26: Teleports_Completed
         27: Capture_Progress
-        28: Capture_Reverse_Bool
+        28: Capture_Reverse_Multiplier
         29: Point_Belongs_To
         30: Is_Point_Contested
         31: Players_On_Point
-        32: Team_Members_On_Point
+        32: Team_Members_Scalar
         33: Only_One_Team
         34: Capture_Reverse
         35: Capture_Color
@@ -120,9 +120,9 @@ rule ("Host Diagnostics") {
         Create HUD Text(All Players(All Teams), Null, Custom String("2Vectors: {0}, {1}, {2}", First Of(Global.Team_2_Vectors), Value In Array(Global.Team_2_Vectors, 1), Value In Array(Global.Team_2_Vectors, 2)), Null, Right, 1, Null, Color(Red), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("3Vectors: {0}, {1}, {2}", First Of(Global.Team_3_Vectors), Value In Array(Global.Team_3_Vectors, 1), Value In Array(Global.Team_3_Vectors, 2)), Null, Right, 2, Null, Color(Blue), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("4Vectors: {0}, {1}, {2}", First Of(Global.Team_4_Vectors), Value In Array(Global.Team_4_Vectors, 1), Value In Array(Global.Team_4_Vectors, 2)), Null, Right, 3, Null, Color(Orange), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("CaptureProgress: {0}\nCaptureReverseBool: {1}\nPointBelongsTo: {2}", Global.Capture_Progress, Global.Capture_Reverse_Bool, Custom String("{0}\nIsPointContested: {1}\nCapture_Reverse: {2}", Global.Point_Belongs_To, Global.Is_Point_Contested, Custom String("{0}\nCapture_Color: {1}", Global.Capture_Reverse, Global.Capture_Color, Null))), Null, Right, 4, Null, Color(White), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("CaptureProgress: {0}\nCaptureReverseBool: {1}\nPointBelongsTo: {2}", Global.Capture_Progress, Global.Capture_Reverse_Multiplier, Custom String("{0}\nIsPointContested: {1}\nCapture_Reverse: {2}", Global.Point_Belongs_To, Global.Is_Point_Contested, Custom String("{0}\nCapture_Color: {1}", Global.Capture_Reverse, Global.Capture_Color, Null))), Null, Right, 4, Null, Color(White), Null, Visible To and String, Default Visibility);
         Create HUD Text(All Players(All Teams), Null, Custom String("PlayersOnPoint: {0}, {1}, {2}", First Of(Global.Players_On_Point), Value In Array(Global.Players_On_Point, 1), Custom String("{0}, {1}, {2}", Value In Array(Global.Players_On_Point, 2), Value In Array(Global.Players_On_Point, 3), Custom String("{0}, {1}", Value In Array(Global.Players_On_Point, 4), Value In Array(Global.Players_On_Point, 5), Null))), Null, Right, 5, Null, Color(Green), Null, Visible To and String, Default Visibility);
-        Create HUD Text(All Players(All Teams), Null, Custom String("TeamMembersOnPoint: {0}\nOnlyOneTeam: {1}\nPointText: {2}", Global.Team_Members_On_Point, Global.Only_One_Team, Custom String("{0}\nProgressVis: {1}", Global.Point_Text, Global.Progress_Visibility, Null)), Null, Right, 6, Null, Color(Blue), Null, Visible To and String, Default Visibility);
+        Create HUD Text(All Players(All Teams), Null, Custom String("TeamMembersScalar: {0}\nOnlyOneTeam: {1}\nPointText: {2}", Global.Team_Members_Scalar, Global.Only_One_Team, Custom String("{0}\nProgressVis: {1}", Global.Point_Text, Global.Progress_Visibility, Null)), Null, Right, 6, Null, Color(Blue), Null, Visible To and String, Default Visibility);
     }
 }
 
@@ -184,7 +184,7 @@ rule ("Initialize variables (and create dummies)") {
     actions {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
         Set Global Variable(Capture_Progress, 0);
-        Set Global Variable(Capture_Reverse_Bool, 1);
+        Set Global Variable(Capture_Reverse_Multiplier, 1);
         Set Global Variable(Capture_Reverse, 0);
         Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
@@ -470,16 +470,17 @@ rule ("Only one team is capturing the point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Count Of(Global.Players_On_Point) > 0;
+        Global.Is_Point_Contested == 1;
     }
     actions {
         "Only one team is capturing the point"
-        Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+        Set Global Variable(Capture_Reverse_Multiplier, 1);
+        Set Global Variable(Capture_Reverse, 0);
         If(Compare(Count Of(Global.Players_On_Point), ==, 1));
             Set Global Variable(Only_One_Team, 1);
         Else If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
             Set Global Variable(Only_One_Team, 0);
-            Set Global Variable(Team_Members_On_Point, 0);
+            Set Global Variable(Team_Members_Scalar, 0);
         Else;
             Set Global Variable(Only_One_Team, 1);
         End;
@@ -487,18 +488,18 @@ rule ("Only one team is capturing the point") {
         If(Compare(Global.Only_One_Team, ==, 1));
             Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
             If(Compare(Count Of(Global.Players_On_Point), ==, 1));
-                Set Global Variable(Team_Members_On_Point, 12);
+                Set Global Variable(Team_Members_Scalar, 12);
             Else If(Compare(Count Of(Global.Players_On_Point), ==, 2));
-                Set Global Variable(Team_Members_On_Point, 20);
+                Set Global Variable(Team_Members_Scalar, 20);
             Else If(Compare(Count Of(Global.Players_On_Point), ==, 3));
-                Set Global Variable(Team_Members_On_Point, 33);
+                Set Global Variable(Team_Members_Scalar, 33);
             End;
         Else If(And(Compare(Global.Only_One_Team, ==, 0), Compare(Count Of(Global.Players_On_Point), >, 1)));
             Set Global Variable(Point_Text, Custom String("Contested", Null, Null, Null));
-            Set Global Variable(Team_Members_On_Point, 0);
+            Set Global Variable(Team_Members_Scalar, 0);
         Else;
             Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
-            Set Global Variable(Team_Members_On_Point, 0);
+            Set Global Variable(Team_Members_Scalar, 0);
     }
 }
 
@@ -512,7 +513,7 @@ rule ("Capture Point Progress") {
         Global.Is_Point_Contested == 1;
     }
     actions {
-        Chase Global Variable At Rate(Capture_Progress, Multiply(100, Global.Capture_Reverse_Bool), Add(Multiply(Multiply(Global.Team_Members_On_Point, Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
+        Chase Global Variable At Rate(Capture_Progress, Multiply(100, Global.Capture_Reverse_Multiplier), Add(Multiply(Multiply(Global.Team_Members_Scalar, Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
         Wait(0.016, Ignore Condition);
     }
 }
@@ -530,11 +531,11 @@ rule ("Reverse capture progress when no player is on the point") {
         "Reverse capture progress when no players contesting"
         Wait Until(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Compare(Global.Is_Point_Contested, ==, 0)), 9999);
         Wait(2, Ignore Condition);
-        Set Global Variable(Capture_Reverse_Bool, 0);
+        Set Global Variable(Capture_Reverse_Multiplier, 0);
         Set Global Variable(Capture_Reverse, 20);
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Wait Until(Global.Is_Point_Contested, 9999);
-        Set Global Variable(Capture_Reverse_Bool, 1);
+        Set Global Variable(Capture_Reverse_Multiplier, 1);
         Set Global Variable(Capture_Reverse, 0);
         Wait(0.1, Ignore Condition);
     }
@@ -567,13 +568,12 @@ rule ("Capture Color") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Global.Capture_Progress > 0;
+        Global.Is_Point_Contested >= 0;
     }
     actions {
-        If(Compare(First Of(Global.Players_On_Point), ==, Null));
+        If(Compare(Global.Only_One_Team, ==, 0));
             Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
-        End;
-        If(Compare(Global.Only_One_Team, ==, 1));
+        Else If(Compare(Global.Only_One_Team, ==, 1));
             "green"
             If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 1));
                 Set Global Variable(Capture_Color, Custom Color(100, 240, 100, 255));
@@ -587,8 +587,6 @@ rule ("Capture Color") {
             Else If(Compare((First Of(Global.Players_On_Point)).Team_Num, ==, 4));
                 Set Global Variable(Capture_Color, Custom Color(148, 0, 67, 255));
             End;
-        Else If(Compare(Global.Only_One_Team, ==, 0));
-            Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         End;
         Wait(0.1, Ignore Condition);
     }
@@ -603,7 +601,7 @@ rule ("Determine whether progress is visible") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Count Of(Global.Players_On_Point) >= 0;
+        Global.Is_Point_Contested >= 0;
     }
     actions {
         If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
