@@ -194,6 +194,7 @@ rule ("Initialize variables (and create dummies)") {
         Set Global Variable(Capture_Reverse, 0);
         Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+        Set Global Variable(Point_Belongs_To, Null);
         Set Global Variable(Team_1_Vectors, Array(Vector(-63, 12, -28), Vector(-50, 13, -26), Vector(-58, 11, -21)));
         Set Global Variable(Team_2_Vectors, Array(Vector(-40, 6, 30), Vector(-47, 6, 26), Vector(-52, 8, 33)));
         Set Global Variable(Team_3_Vectors, Array(Vector(-8, 6, 14), Vector(-10, 5.84, 6), Vector(-1, 6, 18)));
@@ -578,6 +579,8 @@ rule ("Capture point reset") {
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Set Global Variable(Is_Point_Contested, 0);
         Stop Chasing Global Variable(Capture_Progress);
+        Set Global Variable(Point_Belongs_To, (First Of(Global.Players_On_Point)).Team_Num);
+        Wait(0.5, Ignore Condition);
         Set Global Variable(Capture_Progress, 0);
         Wait(1, Ignore Condition);
         Wait Until(Compare(Global.Is_Point_Contested, ==, 1), 9999);
@@ -668,9 +671,6 @@ rule ("Determine whether progress is visible") {
         Global.Teleports_Completed != False;
     }
     actions {
-        If(Compare(Global.Capture_Progress, ==, 0));
-            Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
-        End;
         If(Array Contains(Global.Players_On_Point, Event Player));
             Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
             If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
@@ -686,6 +686,10 @@ rule ("Determine whether progress is visible") {
                 Set Global Variable(Progress_Visibility, Null);
                 Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
             End;
+        End;
+        If(And(Compare(Global.Capture_Progress, ==, 0), Compare(Global.Point_Belongs_To, ==, Null)));
+            Wait(0.25, Ignore Condition);
+            Set Global Variable(Capture_Color, Custom Color(255, 255, 255, 255));
         End;
         Wait(0.5, Ignore Condition);
         Loop If Condition Is True;
@@ -712,6 +716,33 @@ rule ("Create Ring and Light Shaft for Point") {
     }
 }
 
+rule ("If point belongs to a team, reverse capture until 0 and set Point_Belongs_To to 0") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Point_Belongs_To != Null;
+    }
+    actions {
+        If(Or(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)), Compare((Event Player).Team_Num, ==, Global.Point_Belongs_To)));
+            Abort;
+        Else If(Compare(Global.Only_One_Team, ==, 1));
+            Set Global Variable(Capture_Reverse, Multiply(10, Count Of(Global.Players_On_Point)));
+            Set Global Variable(Capture_Reverse_Multiplier, 0);
+        End;
+        Wait Until(Or(Compare(Global.Only_One_Team, ==, 0), Compare(Global.Capture_Progress, ==, 0)), 9999);
+        If(Compare(Global.Capture_Progress, ==, 0));
+            Set Global Variable(Point_Belongs_To, Null);
+        End;
+        Set Global Variable(Capture_Reverse_Multiplier, 1);
+        Set Global Variable(Capture_Reverse, 0);
+        Loop If Condition Is True;
+    }
+}
+
 rule ("Whoever captured the point gets 1 score every ten seconds") {
     event {
         Ongoing - Global;
@@ -721,7 +752,6 @@ rule ("Whoever captured the point gets 1 score every ten seconds") {
         Global.Capture_Progress == 100;
     }
     actions {
-        Set Global Variable(Point_Belongs_To, (First Of(Global.Players_On_Point)).Team_Num);
         If(True);
         Skip(Value In Array(Array(45, 0, 11, 22, 33, 44), Add(1, Index Of Array Value(Array(1, 2, 3, 4, Null), Global.Point_Belongs_To))));
         //__label_switch_2_0__:
