@@ -527,12 +527,12 @@ rule ("Reverse capture progress when no player is on the point") {
     conditions {
         Global.In_Team_Mode != False;
         Global.Teleports_Completed != False;
-        Count Of(Global.Players_On_Point) == 0;
+        Global.Capture_Progress > 0;
     }
     actions {
         "Reverse capture progress when no players contesting"
         If(And(And(Compare(Global.Capture_Progress, >, 0), Compare(Global.Capture_Progress, !=, 100)), Not(Global.Is_Point_Contested)));
-            Wait(1, Ignore Condition);
+            Wait(2.5, Ignore Condition);
             Set Global Variable(Capture_Destination, 0);
             Set Global Variable(Capture_Reverse, 20);
         End;
@@ -590,7 +590,7 @@ rule ("Display capture progress for those on point") {
         If(Compare(Global.Capture_Progress, ==, 100));
             Set Player Variable(Event Player, Player_Progress_Visibility, Null);
         End;
-        If(Entity Exists((Event Player).Progress_Bar));
+        If(Compare((Event Player).Progress_Bar, !=, Null));
             Abort;
         Else;
             Create Progress Bar HUD Text((Event Player).Player_Progress_Visibility, Global.Capture_Progress, Custom String("{0}", Global.Point_Text, Null, Null), Top, 2, Global.Capture_Color, Color(White), Visible To Values and Color, Default Visibility);
@@ -615,7 +615,9 @@ rule ("Display capture progress for those away from point") {
         Else;
             Set Global Variable(Progress_Visibility, Null);
         End;
-        If(Not(Entity Exists(Global.Global_Progress_Bar)));
+        If(Compare(Global.Global_Progress_Bar, !=, Null));
+            Abort;
+        Else If(Compare(Global.Global_Progress_Bar, ==, Null));
             Create Progress Bar In-World Text(Global.Progress_Visibility, Global.Capture_Progress, Null, Add(Global.Capture_Point_Vector, Vector(0, 2.5, 0)), 1, Do Not Clip, Global.Capture_Color, Color(White), Visible To Position Values and Color, Default Visibility);
             Set Global Variable(Global_Progress_Bar, Last Text ID);
         End;
@@ -745,6 +747,7 @@ rule ("Reset back to FFA settings") {
             Stop Forcing Player Outlines(Value In Array(Global.Players_In_Match, Global.Player_Index), All Players(All Teams));
             Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Team_Num, 0);
             Destroy HUD Text((Value In Array(Global.Players_In_Match, Global.Player_Index)).Progress_Bar);
+            Set Player Variable(Value In Array(Global.Players_In_Match, Global.Player_Index), Progress_Bar, Null);
             Wait(0.016, Ignore Condition);
         End;
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, First Of(0)));
@@ -760,6 +763,7 @@ rule ("Reset back to FFA settings") {
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 1)));
         Destroy In-World Text(Value In Array(Global.Array_Of_Nametags, Value In Array(3, 2)));
         Destroy In-World Text(Global.Global_Progress_Bar);
+        Set Global Variable(Global_Progress_Bar, Null);
         Destroy Effect(Global.Sparkle_FX);
         Destroy Effect(Global.Lightshaft_FX);
         Set Global Variable(Team_1, Empty Array);
