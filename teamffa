@@ -70,18 +70,19 @@ variables {
         32: Capture_Reverse_Multiplier
         33: Point_Belongs_To
         34: Is_Point_Contested
-        35: Players_On_Point
-        36: Team_Members_Scalar
-        37: Only_One_Team
-        38: Capture_Reverse
-        39: Capture_Color
-        40: Sparkle_FX
-        41: Lightshaft_FX
-        42: Shaft_Color
-        43: Point_Text
-        44: Global_Progress_Bar
-        45: Progress_Visibility
-        46: Capture_Progress_Sound
+        35: Point_Not_Captured
+        36: Players_On_Point
+        37: Team_Members_Scalar
+        38: Only_One_Team
+        39: Capture_Reverse
+        40: Capture_Color
+        41: Sparkle_FX
+        42: Lightshaft_FX
+        43: Shaft_Color
+        44: Point_Text
+        45: Global_Progress_Bar
+        46: Progress_Visibility
+        47: Capture_Progress_Sound
     player:
         0: Target
         1: Team_Membership
@@ -530,7 +531,7 @@ rule ("Capture Point Progress") {
         Global.Capture_Progress != 100;
     }
     actions {
-        Chase Global Variable At Rate(Capture_Progress, Multiply(100, Global.Capture_Reverse_Multiplier), Add(Multiply(Multiply(Global.Team_Members_Scalar, Global.Is_Point_Contested), Global.Only_One_Team), Global.Capture_Reverse), Destination and Rate);
+        Chase Global Variable At Rate(Capture_Progress, Multiply(100, Global.Capture_Reverse_Multiplier), Add(Multiply(Multiply(Multiply(Global.Team_Members_Scalar, Global.Is_Point_Contested), Global.Only_One_Team), Global.Point_Not_Captured), Global.Capture_Reverse), Destination and Rate);
         If(Entity Exists(Global.Capture_Progress_Sound));
             Abort;
         Else;
@@ -580,6 +581,7 @@ rule ("Capture point reset") {
         Set Global Variable(Is_Point_Contested, 0);
         Stop Chasing Global Variable(Capture_Progress);
         Set Global Variable(Point_Belongs_To, (First Of(Global.Players_On_Point)).Team_Num);
+        Set Global Variable(Point_Not_Captured, 0);
         Wait(0.5, Ignore Condition);
         Set Global Variable(Capture_Progress, 0);
         Wait(1, Ignore Condition);
@@ -736,6 +738,7 @@ rule ("If point belongs to a team, reverse capture until 0 and set Point_Belongs
         Wait Until(Or(Compare(Global.Only_One_Team, ==, 0), Compare(Global.Capture_Progress, ==, 0)), 9999);
         If(Compare(Global.Capture_Progress, ==, 0));
             Set Global Variable(Point_Belongs_To, Null);
+            Set Global Variable(Point_Not_Captured, 1);
         End;
         Set Global Variable(Capture_Reverse_Multiplier, 1);
         Set Global Variable(Capture_Reverse, 0);
@@ -760,7 +763,7 @@ rule ("Whoever captured the point gets 1 score every ten seconds") {
             For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 1));
                     Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 25);
                 End;
             End;
             Wait(10, Ignore Condition);
@@ -772,7 +775,7 @@ rule ("Whoever captured the point gets 1 score every ten seconds") {
             For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 2));
                     Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 25);
                 End;
             End;
             Wait(10, Ignore Condition);
@@ -784,7 +787,7 @@ rule ("Whoever captured the point gets 1 score every ten seconds") {
             For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 3));
                     Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 25);
                 End;
             End;
             Wait(10, Ignore Condition);
@@ -796,7 +799,7 @@ rule ("Whoever captured the point gets 1 score every ten seconds") {
             For Global Variable(Player_Index, 0, Count Of(Global.Players_In_Match), 1);
                 If(Compare((Value In Array(Global.Players_In_Match, Global.Player_Index)).Team_Num, ==, 4));
                     Modify Player Score(Value In Array(Global.Players_In_Match, Global.Player_Index), 1);
-                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 100);
+                    Play Effect(Value In Array(Global.Players_In_Match, Global.Player_Index), Good Pickup Effect, Color(Team 1), Value In Array(Global.Players_In_Match, Global.Player_Index), 25);
                 End;
             End;
             Wait(10, Ignore Condition);
