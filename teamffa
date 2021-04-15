@@ -462,30 +462,6 @@ rule ("Initialize Players on Point") {
     }
 }
 
-rule ("Determine whether progress is visible") {
-    event {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-    conditions {
-        Global.In_Team_Mode != False;
-        Global.Teleports_Completed != False;
-    }
-    actions {
-        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
-            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
-            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
-        Else;
-            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-            Set Global Variable(Progress_Visibility, Null);
-            Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
-        End;
-        Wait(1, Ignore Condition);
-        Loop If Condition Is True;
-    }
-}
-
 rule ("Only one team is capturing the point") {
     event {
         Ongoing - Each Player;
@@ -503,8 +479,7 @@ rule ("Only one team is capturing the point") {
         Set Global Variable(Capture_Reverse, 0);
         If(Compare(Count Of(Global.Players_On_Point), ==, 1));
             Set Global Variable(Only_One_Team, 1);
-        End;
-        If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
+        Else If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
             Set Global Variable(Only_One_Team, 0);
             Set Global Variable(Team_Members_Scalar, 0);
         Else;
@@ -616,6 +591,30 @@ rule ("Capture Color") {
             End;
         End;
         Wait(0.1, Ignore Condition);
+    }
+}
+
+rule ("Determine whether progress is visible") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+    }
+    actions {
+        If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+            Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
+            Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
+        Else;
+            Set Player Variable(Event Player, Player_Progress_Visibility, Null);
+            Set Global Variable(Progress_Visibility, Null);
+            Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
+        End;
+        Wait(1, Ignore Condition);
+        Loop If Condition Is True;
     }
 }
 
