@@ -184,7 +184,7 @@ rule ("Initialize variables (and create dummies)") {
     actions {
         Set Global Variable(Capture_Point_Vector, Vector(-30.7, 10.5, -9.6));
         Set Global Variable(Capture_Progress, 0);
-        Set Global Variable(Capture_Reverse_Bool, 0);
+        Set Global Variable(Capture_Reverse_Bool, 1);
         Set Global Variable(Capture_Reverse, 0);
         Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
