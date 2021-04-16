@@ -511,7 +511,7 @@ rule ("Only one team is capturing the point") {
     }
     actions {
         "Only one team is capturing the point"
-        If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
+        If(And(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)), Compare(Count Of(Global.Players_On_Point), >, 1)));
             Set Global Variable(Only_One_Team, 0);
             Set Global Variable(Team_Members_Scalar, 0);
         Else If(Compare(Count Of(Global.Players_On_Point), ==, 1));
