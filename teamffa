@@ -692,7 +692,7 @@ rule ("Determine whether progress is visible") {
         Global.Teleports_Completed != False;
     }
     actions {
-        If(Array Contains(Global.Players_On_Point, Event Player));
+        If(And(Array Contains(Global.Players_On_Point, Event Player), Compare(Global.Point_Not_Captured, ==, 0)));
             Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
             If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
                 Set Player Variable(Event Player, Player_Progress_Visibility, Event Player);
@@ -701,7 +701,7 @@ rule ("Determine whether progress is visible") {
             End;
         Else;
             Set Player Variable(Event Player, Player_Progress_Visibility, Null);
-            If(Not(Array Contains(Array(100, 0), Global.Capture_Progress)));
+            If(And(Not(Array Contains(Array(100, 0), Global.Capture_Progress)), Compare(Global.Point_Not_Captured, ==, 0)));
                 Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
             Else;
                 Set Global Variable(Progress_Visibility, Null);
