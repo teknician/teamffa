@@ -148,6 +148,23 @@ rule ("Host Diagnostics 2") {
     }
 }
 
+rule ("Host Diagnostics 2") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Event Player == Host Player;
+        Is Button Held(Event Player, Button(Crouch)) == True;
+    }
+    actions {
+        Set Global Variable(Random_Player, Random Value In Array(All Players(All Teams)));
+        Teleport(Global.Random_Player, Position Of(Event Player));
+        Wait(2, Ignore Condition);
+    }
+}
+
 rule ("Host Diagnostics 3") {
     event {
         Ongoing - Each Player;
@@ -494,11 +511,11 @@ rule ("Only one team is capturing the point") {
     }
     actions {
         "Only one team is capturing the point"
-        If(Compare(Count Of(Global.Players_On_Point), ==, 1));
-            Set Global Variable(Only_One_Team, 1);
-        Else If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
+        If(Is True For Any(Remove From Array(Global.Players_On_Point, Event Player), Compare((Current Array Element).Team_Num, !=, (Event Player).Team_Num)));
             Set Global Variable(Only_One_Team, 0);
             Set Global Variable(Team_Members_Scalar, 0);
+        Else If(Compare(Count Of(Global.Players_On_Point), ==, 1));
+            Set Global Variable(Only_One_Team, 1);
         Else;
             Set Global Variable(Only_One_Team, 1);
         End;
@@ -860,9 +877,7 @@ rule ("Damage dealt by teammates is taken as healing") {
         Or(Or(Or(And(First Of(Victim), Array Contains(Global.Team_1, Attacker)), And(First Of(Victim), Array Contains(Global.Team_2, Attacker))), And(First Of(Victim), Array Contains(Global.Team_3, Attacker))), And(First Of(Victim), Array Contains(Global.Team_4, Attacker))) == True;
     }
     actions {
-        Damage(Victim, Attacker, 0.5);
-        Heal(Victim, Attacker, 0.5);
-        Heal(Victim, Attacker, Multiply(Event Damage, 10));
+        Heal(Victim, Attacker, 10);
         Wait(0.125, Ignore Condition);
     }
 }
@@ -878,20 +893,22 @@ rule ("Damage each teammate on a loop to show their health bars") {
         Global.Teleports_Completed != False;
     }
     actions {
-        For Global Variable(Index_2, 0, Number Of Players(All Teams), 1);
-            For Global Variable(Index_3, 0, 3, 1);
-                If(Compare((Event Player).Team_Num, ==, Add(Global.Index_3, 1)));
-                    For Global Variable(Index_4, 0, Count Of(Value In Array(Global.Array_Of_Teams, Add(Global.Index_3, 1))), 1);
-                        Damage(Value In Array(Value In Array(Global.Array_Of_Teams, Add(Global.Index_3, 1)), Global.Index_4), Event Player, 0.01);
+        While(Global.In_Team_Mode);
+            For Global Variable(Index_2, 0, Number Of Players(All Teams), 1);
+                For Global Variable(Index_3, 0, 3, 1);
+                    If(Compare((Event Player).Team_Num, ==, Add(Global.Index_3, 1)));
+                        For Global Variable(Index_4, 0, Count Of(Value In Array(Global.Array_Of_Teams, Add(Global.Index_3, 1))), 1);
+                            Damage(Value In Array(Value In Array(Global.Array_Of_Teams, Add(Global.Index_3, 1)), Global.Index_4), Event Player, 0.01);
+                            Wait(0.016, Ignore Condition);
+                        End;
                         Wait(0.016, Ignore Condition);
                     End;
                     Wait(0.016, Ignore Condition);
                 End;
                 Wait(0.016, Ignore Condition);
             End;
-            Wait(0.016, Ignore Condition);
+            Wait(1, Ignore Condition);
         End;
-        Wait(1, Ignore Condition);
     }
 }
 
