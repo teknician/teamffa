@@ -69,23 +69,26 @@ variables {
         31: Capture_Progress
         32: Capture_Progress_Sound
         33: Capture_Reverse_Multiplier
-        34: Point_Belongs_To
-        35: Is_Point_Contested
-        36: Point_Captured
-        37: Point_Recapture_Multiplier
-        38: Recapture_Progress
-        39: Recapture_Progress_Sound
-        40: Players_On_Point
-        41: Team_Members_Scalar
-        42: Only_One_Team
-        43: Capture_Reverse
-        44: Capture_Color
-        45: Sparkle_FX
-        46: Lightshaft_FX
-        47: Shaft_Color
-        48: Point_Text
-        49: Global_Progress_Bar
-        50: Progress_Visibility
+        34: Recapture_Reverse_Scalar
+        35: Point_Belongs_To
+        36: Is_Point_Contested
+        37: Point_Captured
+        38: Point_Recapture_Multiplier
+        39: Recapture_Progress
+        40: Recapture_Progress_Sound
+        41: Players_On_Point
+        42: Team_Members_Scalar
+        43: Only_One_Team
+        44: Is_Diff_Team
+        45: Capture_Reverse
+        46: Recapture_Reverse
+        47: Capture_Color
+        48: Sparkle_FX
+        49: Lightshaft_FX
+        50: Shaft_Color
+        51: Point_Text
+        52: Global_Progress_Bar
+        53: Progress_Visibility
     player:
         0: Target
         1: Team_Membership
@@ -214,7 +217,10 @@ rule ("Initialize variables (and create dummies)") {
         Set Global Variable(Capture_Color, Color(White));
         Set Global Variable(Capture_Progress, 0);
         Set Global Variable(Capture_Reverse_Multiplier, 1);
+        Set Global Variable(Recapture_Reverse_Scalar, 0);
         Set Global Variable(Capture_Reverse, 0);
+        Set Global Variable(Recapture_Reverse, 0);
+        Set Global Variable(Is_Diff_Team, 0);
         Set Global Variable(Progress_Visibility, Remove From Array(All Players(All Teams), Global.Players_On_Point));
         Set Global Variable(Point_Text, Custom String(" ", Null, Null, Null));
         Set Global Variable(Point_Belongs_To, Null);
@@ -650,7 +656,12 @@ rule ("Only one team is recapturing the point") {
             Set Global Variable(Only_One_Team, 1);
         End;
         Wait(0.016, Ignore Condition);
-        If(Compare(Global.Only_One_Team, ==, 1));
+        If(And(Compare((Event Player).Team_Num, !=, Global.Point_Belongs_To), Compare(Global.Point_Belongs_To, !=, Null)));
+            Set Global Variable(Is_Diff_Team, 1);
+        Else;
+            Set Global Variable(Is_Diff_Team, 0);
+        End;
+        If(And(Compare(Global.Only_One_Team, ==, 1), Compare(Global.Is_Diff_Team, ==, 1)));
             Set Global Variable(Point_Text, Custom String("Capturing...", Null, Null, Null));
             If(Compare(Count Of(Global.Players_On_Point), ==, 1));
                 Set Global Variable(Team_Members_Scalar, 20);
@@ -679,7 +690,7 @@ rule ("Restart capture progress from recapture") {
     }
     actions {
         Set Global Variable(Recapture_Progress, 100);
-        Chase Global Variable At Rate(Recapture_Progress, 0, Multiply(Multiply(Global.Team_Members_Scalar, Global.Only_One_Team), Global.Is_Point_Contested), Destination and Rate);
+        Chase Global Variable At Rate(Recapture_Progress, Global.Recapture_Reverse_Scalar, Add(Global.Recapture_Reverse, Multiply(Multiply(Multiply(Multiply(Global.Team_Members_Scalar, Global.Only_One_Team), Global.Is_Point_Contested), Global.Is_Diff_Team), Global.Point_Captured)), Destination and Rate);
         If(Entity Exists(Global.Recapture_Progress_Sound));
             Abort;
         Else;
@@ -699,6 +710,28 @@ rule ("Restart capture progress from recapture") {
         Set Global Variable(Point_Captured, 0);
         Set Global Variable(Point_Belongs_To, Null);
         Wait(0.5, Ignore Condition);
+    }
+}
+
+rule ("Recapture Progress Reverse...") {
+    event {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+    conditions {
+        Global.Is_Point_Contested == 0;
+        Global.Point_Captured == 1;
+        Global.In_Team_Mode != False;
+        Global.Teleports_Completed != False;
+        Global.Recapture_Progress > 0;
+    }
+    actions {
+        Set Global Variable(Recapture_Reverse_Scalar, 100);
+        Set Global Variable(Recapture_Reverse, 50);
+        Wait Until(Compare(Global.Is_Point_Contested, ==, 1), 9999);
+        Set Global Variable(Recapture_Reverse_Scalar, 0);
+        Set Global Variable(Recapture_Reverse, 0);
     }
 }
 
